@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIndexRouteImport } from './routes/u.index'
 import { Route as UEventiIndexRouteImport } from './routes/u.eventi.index'
+import { Route as UEventiCodeRouteImport } from './routes/u.eventi.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,34 +29,43 @@ const UEventiIndexRoute = UEventiIndexRouteImport.update({
   path: '/u/eventi/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UEventiCodeRoute = UEventiCodeRouteImport.update({
+  id: '/u/eventi/$code',
+  path: '/u/eventi/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/u/': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/u': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi': typeof UEventiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/u/': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/u/' | '/u/eventi/'
+  fullPaths: '/' | '/u/' | '/u/eventi/$code' | '/u/eventi/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/u' | '/u/eventi'
-  id: '__root__' | '/' | '/u/' | '/u/eventi/'
+  to: '/' | '/u' | '/u/eventi/$code' | '/u/eventi'
+  id: '__root__' | '/' | '/u/' | '/u/eventi/$code' | '/u/eventi/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UIndexRoute: typeof UIndexRoute
+  UEventiCodeRoute: typeof UEventiCodeRoute
   UEventiIndexRoute: typeof UEventiIndexRoute
 }
 
@@ -82,12 +92,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UEventiIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/eventi/$code': {
+      id: '/u/eventi/$code'
+      path: '/u/eventi/$code'
+      fullPath: '/u/eventi/$code'
+      preLoaderRoute: typeof UEventiCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UIndexRoute: UIndexRoute,
+  UEventiCodeRoute: UEventiCodeRoute,
   UEventiIndexRoute: UEventiIndexRoute,
 }
 export const routeTree = rootRouteImport
