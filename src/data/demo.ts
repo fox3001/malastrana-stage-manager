@@ -376,7 +376,7 @@ export const MONTHS = [
 
 export function formatDate(iso: string) {
   const d = new Date(iso + "T00:00:00");
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()} ${MONTHS[d.getMonth()]!} ${d.getFullYear()}`;
 }
 
 export function dayNumber(iso: string) {
@@ -384,5 +384,5 @@ export function dayNumber(iso: string) {
 }
 
 export function monthShort(iso: string) {
-  return MONTHS[new Date(iso + "T00:00:00").getMonth()].slice(0, 3).toUpperCase();
+  return MONTHS[new Date(iso + "T00:00:00").getMonth()]!.slice(0, 3).toUpperCase();
 }
