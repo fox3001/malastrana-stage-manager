@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UIndexRouteImport } from './routes/u.index'
+import { Route as UCalendarioRouteImport } from './routes/u.calendario'
+import { Route as UProfiloRouteImport } from './routes/u.profilo'
+import { Route as UEventiIndexRouteImport } from './routes/u.eventi.index'
+import { Route as UEventiCodeRouteImport } from './routes/u.eventi.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UIndexRoute = UIndexRouteImport.update({
+  id: '/u/',
+  path: '/u/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UCalendarioRoute = UCalendarioRouteImport.update({
+  id: '/u/calendario',
+  path: '/u/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UProfiloRoute = UProfiloRouteImport.update({
+  id: '/u/profilo',
+  path: '/u/profilo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UEventiIndexRoute = UEventiIndexRouteImport.update({
+  id: '/u/eventi/',
+  path: '/u/eventi/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UEventiCodeRoute = UEventiCodeRouteImport.update({
+  id: '/u/eventi/$code',
+  path: '/u/eventi/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
+  '/u/profilo': typeof UProfiloRoute
+  '/u/': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
+  '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
+  '/u/profilo': typeof UProfiloRoute
+  '/u': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
+  '/u/eventi': typeof UEventiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
+  '/u/profilo': typeof UProfiloRoute
+  '/u/': typeof UIndexRoute
+  '/u/eventi/$code': typeof UEventiCodeRoute
+  '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/u/calendario'
+    | '/u/profilo'
+    | '/u/'
+    | '/u/eventi/$code'
+    | '/u/eventi/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/u/calendario'
+    | '/u/profilo'
+    | '/u'
+    | '/u/eventi/$code'
+    | '/u/eventi'
+  id:
+    | '__root__'
+    | '/'
+    | '/u/calendario'
+    | '/u/profilo'
+    | '/u/'
+    | '/u/eventi/$code'
+    | '/u/eventi/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UCalendarioRoute: typeof UCalendarioRoute
+  UProfiloRoute: typeof UProfiloRoute
+  UIndexRoute: typeof UIndexRoute
+  UEventiCodeRoute: typeof UEventiCodeRoute
+  UEventiIndexRoute: typeof UEventiIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/': {
+      id: '/u/'
+      path: '/u'
+      fullPath: '/u/'
+      preLoaderRoute: typeof UIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/calendario': {
+      id: '/u/calendario'
+      path: '/u/calendario'
+      fullPath: '/u/calendario'
+      preLoaderRoute: typeof UCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/profilo': {
+      id: '/u/profilo'
+      path: '/u/profilo'
+      fullPath: '/u/profilo'
+      preLoaderRoute: typeof UProfiloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/eventi/': {
+      id: '/u/eventi/'
+      path: '/u/eventi'
+      fullPath: '/u/eventi/'
+      preLoaderRoute: typeof UEventiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/eventi/$code': {
+      id: '/u/eventi/$code'
+      path: '/u/eventi/$code'
+      fullPath: '/u/eventi/$code'
+      preLoaderRoute: typeof UEventiCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UCalendarioRoute: UCalendarioRoute,
+  UProfiloRoute: UProfiloRoute,
+  UIndexRoute: UIndexRoute,
+  UEventiCodeRoute: UEventiCodeRoute,
+  UEventiIndexRoute: UEventiIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
