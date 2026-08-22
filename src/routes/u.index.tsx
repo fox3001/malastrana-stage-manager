@@ -11,7 +11,7 @@ import { useDemo } from "@/lib/store";
 import { CURRENT_USER, NOTIFICATIONS, formatDate } from "@/data/demo";
 import { Boxes, CalendarDays, ClipboardList, Shirt } from "lucide-react";
 
-export const Route = createFileRoute("/u")({
+export const Route = createFileRoute("/u/")({
   head: () => ({
     meta: [
       { title: "Home collaboratore — Malastrana" },
