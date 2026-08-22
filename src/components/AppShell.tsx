@@ -75,9 +75,11 @@ export function AppShell({
           </h1>
           <div className="flex items-center justify-end gap-1">
             <Link
-              to={area === "user" ? "/u/notifiche" : "/admin/modulo/$slug"}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              params={area === "user" ? undefined : ({ slug: "notifiche" } as any)}
+              {...({
+                to: area === "user" ? "/u/notifiche" : "/admin/modulo/$slug",
+                params: area === "user" ? undefined : { slug: "notifiche" },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              } as any)}
               aria-label="Notifiche"
               className="relative flex h-11 w-11 items-center justify-center text-foreground"
             >
