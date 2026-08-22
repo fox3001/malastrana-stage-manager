@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIndexRouteImport } from './routes/u.index'
+import { Route as UCalendarioRouteImport } from './routes/u.calendario'
 import { Route as UEventiIndexRouteImport } from './routes/u.eventi.index'
 import { Route as UEventiCodeRouteImport } from './routes/u.eventi.$code'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const UIndexRoute = UIndexRouteImport.update({
   id: '/u/',
   path: '/u/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UCalendarioRoute = UCalendarioRouteImport.update({
+  id: '/u/calendario',
+  path: '/u/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UEventiIndexRoute = UEventiIndexRouteImport.update({
@@ -37,12 +43,14 @@ const UEventiCodeRoute = UEventiCodeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
   '/u/': typeof UIndexRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
   '/u': typeof UIndexRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi': typeof UEventiIndexRoute
@@ -50,20 +58,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/u/calendario': typeof UCalendarioRoute
   '/u/': typeof UIndexRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/u/' | '/u/eventi/$code' | '/u/eventi/'
+  fullPaths: '/' | '/u/calendario' | '/u/' | '/u/eventi/$code' | '/u/eventi/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/u' | '/u/eventi/$code' | '/u/eventi'
-  id: '__root__' | '/' | '/u/' | '/u/eventi/$code' | '/u/eventi/'
+  to: '/' | '/u/calendario' | '/u' | '/u/eventi/$code' | '/u/eventi'
+  id:
+    | '__root__'
+    | '/'
+    | '/u/calendario'
+    | '/u/'
+    | '/u/eventi/$code'
+    | '/u/eventi/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UCalendarioRoute: typeof UCalendarioRoute
   UIndexRoute: typeof UIndexRoute
   UEventiCodeRoute: typeof UEventiCodeRoute
   UEventiIndexRoute: typeof UEventiIndexRoute
@@ -85,6 +101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/calendario': {
+      id: '/u/calendario'
+      path: '/u/calendario'
+      fullPath: '/u/calendario'
+      preLoaderRoute: typeof UCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/eventi/': {
       id: '/u/eventi/'
       path: '/u/eventi'
@@ -104,6 +127,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UCalendarioRoute: UCalendarioRoute,
   UIndexRoute: UIndexRoute,
   UEventiCodeRoute: UEventiCodeRoute,
   UEventiIndexRoute: UEventiIndexRoute,
