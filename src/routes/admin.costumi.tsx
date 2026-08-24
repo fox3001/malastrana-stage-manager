@@ -1,25 +1,29 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SectionTitle } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
 import { Search, Shirt, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/admin/costumi/")({
+export const Route = createFileRoute("/admin/costumi")({
   component: CostumiLista,
 });
 
-type SizeFilter = "tutte" | "XS" | "S" | "M" | "L" | "XL";
+type SizeFilter = string;
 
 function CostumiLista() {
   const { costumes } = useDemo();
   const [query, setQuery] = useState("");
   const [size, setSize] = useState<SizeFilter>("tutte");
+  const categories = useMemo(
+    () => Array.from(new Set(costumes.map((c) => c.category))),
+    [costumes],
+  );
 
   const filtered = useMemo(() => {
     return costumes.filter((c) => {
       const matchQuery = query === "" || c.name.toLowerCase().includes(query.toLowerCase());
-      const matchSize = size === "tutte" || c.size === size;
+      const matchSize = size === "tutte" || c.category === size;
       return matchQuery && matchSize;
     });
   }, [costumes, query, size]);
@@ -53,7 +57,7 @@ function CostumiLista() {
               className="rounded-md border border-border bg-surface px-2 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="tutte">Tutte</option>
-              {["XS","S","M","L","XL"].map((s) => (
+              {categories.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -79,9 +83,7 @@ function CostumiLista() {
           <ul className="border-t border-border">
             {filtered.map((c) => (
               <li key={c.id}>
-                <Link
-                  to="/admin/costumi/$id"
-                  params={{ id: c.id }}
+                <div
                   className="flex items-center justify-between gap-3 border-b border-border py-3 active:bg-muted"
                 >
                   <div className="flex items-center gap-3">
@@ -89,12 +91,12 @@ function CostumiLista() {
                     <span className="min-w-0">
                       <span className="block truncate text-sm text-foreground">{c.name}</span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        Taglia {c.size} · {c.category}
+                        {c.category}
                       </span>
                     </span>
                   </div>
-                  <span className="eyebrow shrink-0 text-accent">{c.status}</span>
-                </Link>
+                  <span className="eyebrow shrink-0 text-accent">{c.verification}</span>
+                </div>
               </li>
             ))}
           </ul>

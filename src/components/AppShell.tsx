@@ -2,7 +2,7 @@ import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { Bell, ChevronLeft, Home, Menu, Shirt, X } from "lucide-react";
 import { ReactNode, useState } from "react";
 
-export type AppShellArea = "u" | "admin";
+export type AppShellArea = "u" | "user" | "admin";
 
 export function AppShell({
   area,
@@ -76,7 +76,7 @@ export function AppShell({
           <div className="flex items-center gap-2">
             {area === "admin" && notifications && notifications > 0 && (
               <Link
-                to="/admin/notifiche"
+                to="/u/notifiche"
                 className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
               >
                 <Bell className="h-5 w-5 text-foreground" strokeWidth={1.5} />
@@ -158,7 +158,7 @@ export function AppShell({
               </li>
             </>
           )}
-          {area === "u" && (
+          {area !== "admin" && (
             <>
               <li className="mb-3">
                 <Link
@@ -172,7 +172,7 @@ export function AppShell({
               </li>
               <li className="mb-3">
                 <Link
-                  to="/u/disponibilita"
+                  to="/u/calendario"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
                 >

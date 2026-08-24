@@ -24,10 +24,12 @@ import { Route as AdminCollaboratoriIndexRouteImport } from './routes/admin.coll
 import { Route as AdminCollaboratoriIdRouteImport } from './routes/admin.collaboratori.$id'
 import { Route as AdminEventiIndexRouteImport } from './routes/admin.eventi.index'
 import { Route as AdminEventiCodeRouteImport } from './routes/admin.eventi.$code'
+import { Route as AdminEventiNuovoRouteImport } from './routes/admin.eventi.nuovo'
 import { Route as AdminModuloSlugRouteImport } from './routes/admin.modulo.$slug'
 import { Route as UBollaCodeRouteImport } from './routes/u.bolla.$code'
 import { Route as UEventiIndexRouteImport } from './routes/u.eventi.index'
 import { Route as UEventiCodeRouteImport } from './routes/u.eventi.$code'
+import { Route as AdminCollaboratoriIdDisponibilitaRouteImport } from './routes/admin.collaboratori.$id.disponibilita'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -104,6 +106,11 @@ const AdminEventiCodeRoute = AdminEventiCodeRouteImport.update({
   path: '/admin/eventi/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEventiNuovoRoute = AdminEventiNuovoRouteImport.update({
+  id: '/admin/eventi/nuovo',
+  path: '/admin/eventi/nuovo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminModuloSlugRoute = AdminModuloSlugRouteImport.update({
   id: '/admin/modulo/$slug',
   path: '/admin/modulo/$slug',
@@ -124,6 +131,12 @@ const UEventiCodeRoute = UEventiCodeRouteImport.update({
   path: '/u/eventi/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCollaboratoriIdDisponibilitaRoute =
+  AdminCollaboratoriIdDisponibilitaRouteImport.update({
+    id: '/disponibilita',
+    path: '/disponibilita',
+    getParentRoute: () => AdminCollaboratoriIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,14 +150,16 @@ export interface FileRoutesByFullPath {
   '/u/profilo': typeof UProfiloRoute
   '/admin/': typeof AdminIndexRoute
   '/u/': typeof UIndexRoute
-  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRoute
+  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRouteWithChildren
   '/admin/eventi/$code': typeof AdminEventiCodeRoute
+  '/admin/eventi/nuovo': typeof AdminEventiNuovoRoute
   '/admin/modulo/$slug': typeof AdminModuloSlugRoute
   '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/admin/collaboratori/': typeof AdminCollaboratoriIndexRoute
   '/admin/eventi/': typeof AdminEventiIndexRoute
   '/u/eventi/': typeof UEventiIndexRoute
+  '/admin/collaboratori/$id/disponibilita': typeof AdminCollaboratoriIdDisponibilitaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -158,14 +173,16 @@ export interface FileRoutesByTo {
   '/u/profilo': typeof UProfiloRoute
   '/admin': typeof AdminIndexRoute
   '/u': typeof UIndexRoute
-  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRoute
+  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRouteWithChildren
   '/admin/eventi/$code': typeof AdminEventiCodeRoute
+  '/admin/eventi/nuovo': typeof AdminEventiNuovoRoute
   '/admin/modulo/$slug': typeof AdminModuloSlugRoute
   '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/admin/collaboratori': typeof AdminCollaboratoriIndexRoute
   '/admin/eventi': typeof AdminEventiIndexRoute
   '/u/eventi': typeof UEventiIndexRoute
+  '/admin/collaboratori/$id/disponibilita': typeof AdminCollaboratoriIdDisponibilitaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -180,14 +197,16 @@ export interface FileRoutesById {
   '/u/profilo': typeof UProfiloRoute
   '/admin/': typeof AdminIndexRoute
   '/u/': typeof UIndexRoute
-  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRoute
+  '/admin/collaboratori/$id': typeof AdminCollaboratoriIdRouteWithChildren
   '/admin/eventi/$code': typeof AdminEventiCodeRoute
+  '/admin/eventi/nuovo': typeof AdminEventiNuovoRoute
   '/admin/modulo/$slug': typeof AdminModuloSlugRoute
   '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/admin/collaboratori/': typeof AdminCollaboratoriIndexRoute
   '/admin/eventi/': typeof AdminEventiIndexRoute
   '/u/eventi/': typeof UEventiIndexRoute
+  '/admin/collaboratori/$id/disponibilita': typeof AdminCollaboratoriIdDisponibilitaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -205,12 +224,14 @@ export interface FileRouteTypes {
     | '/u/'
     | '/admin/collaboratori/$id'
     | '/admin/eventi/$code'
+    | '/admin/eventi/nuovo'
     | '/admin/modulo/$slug'
     | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/admin/collaboratori/'
     | '/admin/eventi/'
     | '/u/eventi/'
+    | '/admin/collaboratori/$id/disponibilita'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -226,12 +247,14 @@ export interface FileRouteTypes {
     | '/u'
     | '/admin/collaboratori/$id'
     | '/admin/eventi/$code'
+    | '/admin/eventi/nuovo'
     | '/admin/modulo/$slug'
     | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/admin/collaboratori'
     | '/admin/eventi'
     | '/u/eventi'
+    | '/admin/collaboratori/$id/disponibilita'
   id:
     | '__root__'
     | '/'
@@ -247,12 +270,14 @@ export interface FileRouteTypes {
     | '/u/'
     | '/admin/collaboratori/$id'
     | '/admin/eventi/$code'
+    | '/admin/eventi/nuovo'
     | '/admin/modulo/$slug'
     | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/admin/collaboratori/'
     | '/admin/eventi/'
     | '/u/eventi/'
+    | '/admin/collaboratori/$id/disponibilita'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -267,8 +292,9 @@ export interface RootRouteChildren {
   UProfiloRoute: typeof UProfiloRoute
   AdminIndexRoute: typeof AdminIndexRoute
   UIndexRoute: typeof UIndexRoute
-  AdminCollaboratoriIdRoute: typeof AdminCollaboratoriIdRoute
+  AdminCollaboratoriIdRoute: typeof AdminCollaboratoriIdRouteWithChildren
   AdminEventiCodeRoute: typeof AdminEventiCodeRoute
+  AdminEventiNuovoRoute: typeof AdminEventiNuovoRoute
   AdminModuloSlugRoute: typeof AdminModuloSlugRoute
   UBollaCodeRoute: typeof UBollaCodeRoute
   UEventiCodeRoute: typeof UEventiCodeRoute
@@ -384,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventiCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/eventi/nuovo': {
+      id: '/admin/eventi/nuovo'
+      path: '/admin/eventi/nuovo'
+      fullPath: '/admin/eventi/nuovo'
+      preLoaderRoute: typeof AdminEventiNuovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/modulo/$slug': {
       id: '/admin/modulo/$slug'
       path: '/admin/modulo/$slug'
@@ -412,8 +445,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UEventiCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/collaboratori/$id/disponibilita': {
+      id: '/admin/collaboratori/$id/disponibilita'
+      path: '/disponibilita'
+      fullPath: '/admin/collaboratori/$id/disponibilita'
+      preLoaderRoute: typeof AdminCollaboratoriIdDisponibilitaRouteImport
+      parentRoute: typeof AdminCollaboratoriIdRoute
+    }
   }
 }
+
+interface AdminCollaboratoriIdRouteChildren {
+  AdminCollaboratoriIdDisponibilitaRoute: typeof AdminCollaboratoriIdDisponibilitaRoute
+}
+
+const AdminCollaboratoriIdRouteChildren: AdminCollaboratoriIdRouteChildren = {
+  AdminCollaboratoriIdDisponibilitaRoute:
+    AdminCollaboratoriIdDisponibilitaRoute,
+}
+
+const AdminCollaboratoriIdRouteWithChildren =
+  AdminCollaboratoriIdRoute._addFileChildren(AdminCollaboratoriIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -427,8 +479,9 @@ const rootRouteChildren: RootRouteChildren = {
   UProfiloRoute: UProfiloRoute,
   AdminIndexRoute: AdminIndexRoute,
   UIndexRoute: UIndexRoute,
-  AdminCollaboratoriIdRoute: AdminCollaboratoriIdRoute,
+  AdminCollaboratoriIdRoute: AdminCollaboratoriIdRouteWithChildren,
   AdminEventiCodeRoute: AdminEventiCodeRoute,
+  AdminEventiNuovoRoute: AdminEventiNuovoRoute,
   AdminModuloSlugRoute: AdminModuloSlugRoute,
   UBollaCodeRoute: UBollaCodeRoute,
   UEventiCodeRoute: UEventiCodeRoute,

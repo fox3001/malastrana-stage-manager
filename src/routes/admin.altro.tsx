@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SectionTitle } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
 import { ClipboardList, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/admin/altro/")({
+export const Route = createFileRoute("/admin/altro")({
   component: MaterialiLista,
 });
 
@@ -58,9 +58,7 @@ function MaterialiLista() {
           <ul className="border-t border-border">
             {filtered.map((g) => (
               <li key={g.id}>
-                <Link
-                  to="/admin/altro/$id"
-                  params={{ id: g.id }}
+                <div
                   className="flex items-center justify-between gap-3 border-b border-border py-3 active:bg-muted"
                 >
                   <div className="flex items-center gap-3">
@@ -68,12 +66,12 @@ function MaterialiLista() {
                     <span className="min-w-0">
                       <span className="block truncate text-sm text-foreground">{g.name}</span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {g.category}
+                        {g.description}
                       </span>
                     </span>
                   </div>
-                  <span className="eyebrow shrink-0 text-accent">{g.status}</span>
-                </Link>
+                  <span className="eyebrow shrink-0 text-accent">{g.verification}</span>
+                </div>
               </li>
             ))}
           </ul>
