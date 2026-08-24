@@ -55,6 +55,15 @@ function CollaboratoreDettaglio() {
           </Link>
         </div>
       </section>
+
+      <section className="mt-6 px-3">
+        <SectionTitle>Note</SectionTitle>
+        <div className="border border-border bg-surface p-4">
+          <p className="text-sm text-foreground">
+            Note e dettagli aggiuntivi sul collaboratore (da implementare).
+          </p>
+        </div>
+      </section>
     </AppShell>
   );
 }
