@@ -47,7 +47,7 @@ const SHORTCUTS = [
 ];
 
 function AdminHome() {
-  const { events, availability, costumes, gear } = useDemo();
+  const { events, availability, costumes, gear, setAvailabilityResponse } = useDemo();
   const sorted = [...events]
     .filter((e) => e.status !== "annullato")
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -55,7 +55,7 @@ function AdminHome() {
   const requests = events.filter((e) => e.status === "richiesta");
   const daDefinire = events.filter((e) => e.status === "da_definire");
   const confirmed = events.filter((e) => e.status === "confermato");
-  const unanswered = requests.filter((event) => !availability[event.id]);
+  const unanswered = requests.filter((event) => availability[event.id] === undefined);
   const collaboratorsToCheck = COLLABORATORS.filter(
     (collaborator) => collaborator.state !== "disponibile",
   );
@@ -68,7 +68,7 @@ function AdminHome() {
         <p className="eyebrow text-accent">Quadro di regia</p>
         <h2 className="mt-1 font-serif text-3xl text-primary">Organizzazione</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Priorità¹², convocazioni e controllo operativo in un solo punto.
+          Priorità²², convocazioni e controllo operativo in un solo punto.
         </p>
       </section>
 
@@ -192,41 +192,56 @@ function AdminHome() {
           </div>
         ) : (
           <ul className="border-t border-border">
-            {unanswered.slice(0, 3).map((e) => (
-              <li key={e.id} className="border-b border-border py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <Link
-                    to="/admin/eventi/$code"
-                    params={{ code: e.code }}
-                    className="flex min-w-0 flex-1 items-center gap-3 active:bg-muted"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm text-foreground">{e.name}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {e.place} · {e.timeStart}–{e.timeEnd}
+            {unanswered.slice(0, 3).map((e) => {
+              const response = availability[e.id];
+              return (
+                <li key={e.id} className="border-b border-border py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <Link
+                      to="/admin/eventi/$code"
+                      params={{ code: e.code }}
+                      className="flex min-w-0 flex-1 items-center gap-3 active:bg-muted"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm text-foreground">{e.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {e.place} · {e.timeStart}–{e.timeEnd}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
-                  <StatusTag status={e.status} />
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-accent active:bg-muted"
-                      aria-label="Conferma disponibilità"
-                      title="Conferma"
-                    >
-                      <CheckCircle2 className="h-4 w-4" strokeWidth={1.8} />
-                    </button>
-                    <button
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted-foreground active:bg-muted"
-                      aria-label="Non confermare"
-                      title="Non confermare"
-                    >
-                      <XCircle className="h-4 w-4" strokeWidth={1.8} />
-                    </button>
+                    </Link>
+                    <StatusTag status={e.status} />
+                    {response === undefined ? (
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          onClick={() => setAvailabilityResponse(e.id, "yes")}
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-accent active:bg-muted"
+                          aria-label="Conferma disponibilità"
+                          title="Conferma"
+                        >
+                          <CheckCircle2 className="h-4 w-4" strokeWidth={1.8} />
+                        </button>
+                        <button
+                          onClick={() => setAvailabilityResponse(e.id, "no")}
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted-foreground active:bg-muted"
+                          aria-label="Non confermare"
+                          title="Non confermare"
+                        >
+                          <XCircle className="h-4 w-4" strokeWidth={1.8} />
+                        </button>
+                      </div>
+                    ) : (
+                      <span
+                        className={`eyebrow shrink-0 ${
+                          response === "yes" ? "text-accent" : "text-muted-foreground"
+                        }`}
+                      >
+                        {response === "yes" ? "Confermato" : "Non confermato"}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
