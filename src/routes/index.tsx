@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LogoMark, Wordmark, DemoNote } from "@/components/ui-kit";
+import { DemoNote } from "@/components/ui-kit";
 import { ShieldCheck, User } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -28,10 +28,11 @@ function Ingresso() {
     <div className="flex min-h-screen flex-col justify-between bg-background px-safe pb-safe pt-safe">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
         <div className="flex flex-col items-center">
-          <LogoMark />
-          <div className="mt-6">
-            <Wordmark />
-          </div>
+          <img
+            src="/malastrana-logo.png"
+            alt="Malastrana App"
+            className="h-auto w-full max-w-[17rem] object-contain sm:max-w-[20rem]"
+          />
         </div>
 
         <div className="mt-14">
