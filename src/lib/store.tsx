@@ -3,8 +3,10 @@ import { EVENTS, COLLABORATORS, COSTUMES, GEAR, NOTIFICATIONS } from "@/data/dem
 
 export type AvailabilityResponse = "yes" | "no";
 
+export type DemoEvent = typeof EVENTS[number];
+
 export interface DemoState {
-  events: typeof EVENTS;
+  events: DemoEvent[];
   availability: Record<string, AvailabilityResponse | undefined>;
   costumes: typeof COSTUMES;
   gear: typeof GEAR;
