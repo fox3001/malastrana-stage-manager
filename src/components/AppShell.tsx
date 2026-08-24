@@ -2,7 +2,7 @@ import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { Bell, ChevronLeft, Home, Menu, Shirt, X } from "lucide-react";
 import { ReactNode, useState } from "react";
 
-export type AppShellArea = "u" | "user" | "admin";
+export type AppShellArea = "u" | "admin";
 
 export function AppShell({
   area,
@@ -15,11 +15,6 @@ export function AppShell({
   children: ReactNode;
   title?: string;
   notifications?: number;
-  /**
-   * Destinazione esplicita per il pulsante Indietro.
-   * Se non fornita, il componente usa la history del router per tornare indietro
-   * su tutte le route interne, tranne le Home `/u` e `/admin`.
-   */
   back?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,35 +44,28 @@ export function AppShell({
             {showBack && (
               <button
                 onClick={handleBack}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted"
+                className="hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted sm:flex"
                 aria-label="Indietro"
               >
                 <ChevronLeft className="h-5 w-5" strokeWidth={1.8} />
               </button>
             )}
-            <Link
-              to={area === "admin" ? "/admin" : "/u"}
-              className="flex items-center gap-2"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white">
-                <Home className="h-5 w-5" strokeWidth={1.8} />
-              </div>
-              <div>
-                <p className="font-serif text-lg leading-none text-primary">
-                  {area === "admin" ? "Malastrana" : "Ciao, utente"}
-                </p>
-                <p className="eyebrow text-xs text-muted-foreground">
-                  {area === "admin" ? "Stage Manager" : "Area riservata"}
-                </p>
-              </div>
-            </Link>
+            <div>
+              <p className="font-serif text-lg leading-none text-primary">
+                {area === "admin" ? "Malastrana" : "Ciao, utente"}
+              </p>
+              <p className="eyebrow text-xs text-muted-foreground">
+                {area === "admin" ? "Stage Manager" : "Area riservata"}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             {area === "admin" && notifications && notifications > 0 && (
               <Link
-                to="/u/notifiche"
+                to="/admin/notifiche"
                 className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
+                aria-label="Notifiche"
               >
                 <Bell className="h-5 w-5 text-foreground" strokeWidth={1.5} />
                 <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
@@ -85,6 +73,14 @@ export function AppShell({
                 </span>
               </Link>
             )}
+            <Link
+              to={area === "admin" ? "/admin" : "/u"}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
+              aria-label="Torna alla home"
+              title="Torna alla home"
+            >
+              <Home className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+            </Link>
             <button
               onClick={() => setMenuOpen(true)}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
@@ -158,7 +154,7 @@ export function AppShell({
               </li>
             </>
           )}
-          {area !== "admin" && (
+          {area === "u" && (
             <>
               <li className="mb-3">
                 <Link
@@ -172,7 +168,7 @@ export function AppShell({
               </li>
               <li className="mb-3">
                 <Link
-                  to="/u/calendario"
+                  to="/u/disponibilita"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
                 >
