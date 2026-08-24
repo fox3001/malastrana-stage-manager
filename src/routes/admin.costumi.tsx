@@ -5,7 +5,7 @@ import { useDemo } from "@/lib/store";
 import { Search, Shirt, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/admin/costumi/")({
+export const Route = createFileRoute("/admin/costumi")({
   component: CostumiLista,
 });
 

@@ -5,7 +5,7 @@ import { useDemo } from "@/lib/store";
 import { ClipboardList, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/admin/altro/")({
+export const Route = createFileRoute("/admin/altro")({
   component: MaterialiLista,
 });
 
