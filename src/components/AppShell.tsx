@@ -1,140 +1,196 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import type { ReactNode } from "react";
-import {
-  Bell,
-  CalendarDays,
-  ChevronLeft,
-  Home,
-  MoreHorizontal,
-  Scroll,
-  User,
-  Users,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, useLocation, useRouter } from "@tanstack/react-router";
+import { Bell, ChevronLeft, Home, Menu, Shirt, X } from "lucide-react";
+import { ReactNode, useState } from "react";
 
-export type Area = "user" | "admin";
-
-interface NavItem {
-  to: string;
-  label: string;
-  icon: typeof Home;
-  exact?: boolean;
-}
-
-const USER_NAV: NavItem[] = [
-  { to: "/u", label: "Home", icon: Home, exact: true },
-  { to: "/u/eventi", label: "Eventi", icon: Scroll },
-  { to: "/u/calendario", label: "Calendario", icon: CalendarDays },
-  { to: "/u/profilo", label: "Profilo", icon: User },
-];
-
-const ADMIN_NAV: NavItem[] = [
-  { to: "/admin", label: "Home", icon: Home, exact: true },
-  { to: "/admin/eventi", label: "Eventi", icon: Scroll },
-  { to: "/admin/collaboratori", label: "Collaboratori", icon: Users },
-  { to: "/admin/calendario", label: "Calendario", icon: CalendarDays },
-  { to: "/admin/altro", label: "Altro", icon: MoreHorizontal },
-];
+export type AppShellArea = "u" | "admin";
 
 export function AppShell({
   area,
-  title,
-  back,
   children,
-  notifications = 0,
+  title,
+  notifications,
+  back,
 }: {
-  area: Area;
-  title: string;
-  back?: string;
+  area: AppShellArea;
   children: ReactNode;
+  title?: string;
   notifications?: number;
+  /**
+   * Destinazione esplicita per il pulsante Indietro.
+   * Se non fornita, il componente usa la history del router per tornare indietro
+   * su tutte le route interne, tranne le Home `/u` e `/admin`.
+   */
+  back?: string;
 }) {
-  const nav = area === "user" ? USER_NAV : ADMIN_NAV;
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const router = useRouter();
+
+  const isHome = location.pathname === "/u" || location.pathname === "/admin";
+  const showBack = !isHome;
+
+  const handleBack = () => {
+    if (back) {
+      router.navigate({ to: back as any });
+      return;
+    }
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      router.navigate({ to: area === "admin" ? "/admin" : "/u" });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-surface/95 pt-safe px-safe backdrop-blur">
-        <div className="mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5">
-          <div className="flex min-w-0 items-center gap-1">
-            {back ? (
-              <Link
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                to={back as any}
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-20 border-b border-border-strong bg-surface/95 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-3 py-3">
+          <div className="flex items-center gap-2">
+            {showBack && (
+              <button
+                onClick={handleBack}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted"
                 aria-label="Indietro"
-                className="-ml-2 flex h-11 w-11 items-center justify-center text-primary"
               >
-                <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
-              </Link>
-            ) : (
-              <span className="eyebrow whitespace-nowrap text-primary">MALASTRANA</span>
+                <ChevronLeft className="h-5 w-5" strokeWidth={1.8} />
+              </button>
             )}
-          </div>
-          <h1 className="min-w-0 truncate text-center font-serif text-base text-foreground">
-            {title}
-          </h1>
-          <div className="flex items-center justify-end gap-1">
             <Link
-              to="/"
-              aria-label="Torna alla schermata iniziale"
-              className="flex h-11 w-11 items-center justify-center text-accent"
+              to={area === "admin" ? "/admin" : "/u"}
+              className="flex items-center gap-2"
             >
-              <Home className="h-5 w-5" strokeWidth={1.5} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white">
+                <Home className="h-5 w-5" strokeWidth={1.8} />
+              </div>
+              <div>
+                <p className="font-serif text-lg leading-none text-primary">
+                  {area === "admin" ? "Malastrana" : "Ciao, utente"}
+                </p>
+                <p className="eyebrow text-xs text-muted-foreground">
+                  {area === "admin" ? "Stage Manager" : "Area riservata"}
+                </p>
+              </div>
             </Link>
-            <Link
-              {...({
-                to: area === "user" ? "/u/notifiche" : "/admin/modulo/$slug",
-                params: area === "user" ? undefined : { slug: "notifiche" },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } as any)}
-              aria-label="Notifiche"
-              className="relative flex h-11 w-11 items-center justify-center text-foreground"
-            >
-              <Bell className="h-5 w-5" strokeWidth={1.5} />
-              {notifications > 0 && (
-                <span className="absolute right-2 top-2 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-semibold leading-4 text-primary-foreground">
+          </div>
+
+          <div className="flex items-center gap-2">
+            {area === "admin" && notifications && notifications > 0 && (
+              <Link
+                to="/admin/notifiche"
+                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
+              >
+                <Bell className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
                   {notifications}
                 </span>
-              )}
-            </Link>
+              </Link>
+            )}
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
+              aria-label="Apri menu"
+            >
+              <Menu className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+            </button>
           </div>
-        </div>
-        <div className="mx-auto w-full max-w-3xl px-3 pb-1.5">
-          <p className="eyebrow text-muted-foreground/70">
-            {area === "user" ? "Area utente demo" : "Area admin demo"} · prototipo UI
-          </p>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-safe pb-32">{children}</main>
+      <main className="mx-auto max-w-5xl pb-20">{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe px-safe">
-        <ul className="mx-auto flex w-full max-w-3xl">
-          {nav.map((item) => {
-            const active = item.exact
-              ? pathname === item.to
-              : pathname.startsWith(item.to);
-            const Icon = item.icon;
-            return (
-              <li key={item.to} className="flex-1">
+      <nav
+        className={`fixed inset-y-0 right-0 z-30 w-64 transform border-l border-border bg-surface shadow-xl transition-transform duration-200 ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <p className="font-serif text-lg text-primary">Menu</p>
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
+            aria-label="Chiudi menu"
+          >
+            <X className="h-4 w-4 text-foreground" strokeWidth={1.8} />
+          </button>
+        </div>
+        <ul className="p-4">
+          <li className="mb-3">
+            <Link
+              to={area === "admin" ? "/admin" : "/u"}
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              <Home className="h-4 w-4" strokeWidth={1.5} />
+              Home {area === "admin" ? "Admin" : "Utente"}
+            </Link>
+          </li>
+          {area === "admin" && (
+            <>
+              <li className="mb-3">
                 <Link
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  to={item.to as any}
-                  className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-1 px-1 py-2",
-                    active ? "text-primary" : "text-muted-foreground",
-                  )}
+                  to="/admin/eventi"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
                 >
-                  <Icon className="h-5 w-5" strokeWidth={active ? 1.9 : 1.4} />
-                  <span className="w-full truncate text-center text-[10px] font-medium tracking-wide">
-                    {item.label}
-                  </span>
+                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
+                  Eventi
                 </Link>
               </li>
-            );
-          })}
+              <li className="mb-3">
+                <Link
+                  to="/admin/collaboratori"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                >
+                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
+                  Collaboratori
+                </Link>
+              </li>
+              <li className="mb-3">
+                <Link
+                  to="/admin/costumi"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                >
+                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
+                  Costumi
+                </Link>
+              </li>
+            </>
+          )}
+          {area === "u" && (
+            <>
+              <li className="mb-3">
+                <Link
+                  to="/u/eventi"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                >
+                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
+                  I tuoi eventi
+                </Link>
+              </li>
+              <li className="mb-3">
+                <Link
+                  to="/u/disponibilita"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                >
+                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
+                  Disponibilità
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
+
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/40"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
     </div>
   );
 }

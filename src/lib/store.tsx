@@ -1,151 +1,38 @@
-/**
- * Store locale del prototipo.
- * Solo React state + localStorage: nessuna rete, nessun backend, nessuna auth.
- * In futuro le stesse funzioni potranno essere sostituite da chiamate reali
- * senza modificare i componenti che le consumano.
- */
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  COSTUMES,
-  EVENTS,
-  GEAR,
-  LOAD_ROWS,
-  type Availability,
-  type Costume,
-  type GearItem,
-  type LoadRow,
-  type MalEvent,
-} from "@/data/demo";
+import { create } from "zustand";
+import { EVENTS, COLLABORATORS, COSTUMES, GEAR, NOTIFICATIONS } from "@/data/demo";
 
-const KEY = "malastrana-demo-v1";
+export type AvailabilityResponse = "yes" | "no";
 
-export interface TimelineEntry {
-  id: string;
-  text: string;
-  at: string;
+export interface DemoState {
+  events: typeof EVENTS;
+  availability: Record<string, AvailabilityResponse | undefined>;
+  costumes: typeof COSTUMES;
+  gear: typeof GEAR;
+  setAvailabilityResponse: (eventId: string, response: AvailabilityResponse) => void;
+  clearAvailabilityResponse: (eventId: string) => void;
 }
 
-interface DemoState {
-  events: MalEvent[];
-  availability: Record<string, Availability>;
-  costumes: Costume[];
-  gear: GearItem[];
-  load: LoadRow[];
-  timeline: TimelineEntry[];
-}
-
-const initialState: DemoState = {
+export const useDemo = create<DemoState>((set) => ({
   events: EVENTS,
   availability: {},
   costumes: COSTUMES,
   gear: GEAR,
-  load: LOAD_ROWS,
-  timeline: [],
-};
 
-interface DemoContextValue extends DemoState {
-  setAvailability: (eventId: string, value: Availability) => void;
-  addCostume: (c: Omit<Costume, "id" | "owner" | "verification">) => void;
-  updateLoadRow: (id: string, patch: Partial<LoadRow>, label: string) => void;
-  reset: () => void;
-}
+  setAvailabilityResponse: (eventId, response) =>
+    set((state) => ({
+      availability: {
+        ...state.availability,
+        [eventId]: response,
+      },
+    })),
 
-const DemoContext = createContext<DemoContextValue | null>(null);
+  clearAvailabilityResponse: (eventId) =>
+    set((state) => {
+      const next = { ...state.availability };
+      delete next[eventId];
+      return { availability: next };
+    }),
+}));
 
-function nowLabel() {
-  return new Date().toLocaleTimeString("it-IT", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-export function DemoProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<DemoState>(initialState);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setState({ ...initialState, ...JSON.parse(raw) });
-    } catch {
-      /* prototipo: ignoriamo storage non disponibile */
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(KEY, JSON.stringify(state));
-    } catch {
-      /* noop */
-    }
-  }, [state]);
-
-  const pushTimeline = useCallback((text: string) => {
-    setState((s) => ({
-      ...s,
-      timeline: [
-        { id: crypto.randomUUID(), text, at: nowLabel() },
-        ...s.timeline,
-      ].slice(0, 12),
-    }));
-  }, []);
-
-  const setAvailability = useCallback(
-    (eventId: string, value: Availability) => {
-      setState((s) => ({ ...s, availability: { ...s.availability, [eventId]: value } }));
-    },
-    [],
-  );
-
-  const addCostume = useCallback(
-    (c: Omit<Costume, "id" | "owner" | "verification">) => {
-      setState((s) => ({
-        ...s,
-        costumes: [
-          ...s.costumes,
-          { ...c, id: crypto.randomUUID(), owner: "col-elena", verification: "inserito" },
-        ],
-      }));
-    },
-    [],
-  );
-
-  const updateLoadRow = useCallback(
-    (id: string, patch: Partial<LoadRow>, label: string) => {
-      setState((s) => ({
-        ...s,
-        load: s.load.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        timeline: [
-          { id: crypto.randomUUID(), text: label, at: nowLabel() },
-          ...s.timeline,
-        ].slice(0, 12),
-      }));
-    },
-    [],
-  );
-
-  const reset = useCallback(() => setState(initialState), []);
-
-  const value = useMemo(
-    () => ({ ...state, setAvailability, addCostume, updateLoadRow, reset }),
-    [state, setAvailability, addCostume, updateLoadRow, reset],
-  );
-
-  // pushTimeline è esposto internamente per estensioni future
-  void pushTimeline;
-
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
-}
-
-export function useDemo() {
-  const ctx = useContext(DemoContext);
-  if (!ctx) throw new Error("useDemo deve essere usato dentro DemoProvider");
-  return ctx;
-}
+// Export utili per compatibilità²²
+export { COLLABORATORS, NOTIFICATIONS };
