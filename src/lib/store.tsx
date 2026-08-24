@@ -21,6 +21,37 @@ import {
 } from "@/data/demo";
 
 export type AvailabilityResponse = "yes" | "no" | "disponibile" | "non_disponibile" | "da_definire";
+export type BollaItemStatus = "presente" | "danneggiato" | "mancante";
+export type EventStatus = "richiesta" | "da_definire" | "confermato" | "annullato" | "chiuso";
+
+export interface BollaItem {
+  id: string;
+  code: string;
+  name: string;
+  type: "costume" | "oggetto" | "scenografia";
+  size: string;
+  qty: number;
+  notes?: string;
+}
+
+export interface Bolla {
+  id: string;
+  code: string;
+  date: string;
+  eventCode: string;
+  items: BollaItem[];
+  closed: boolean;
+  teamLeaderId?: string;
+}
+
+export interface MalEventExtended extends MalEvent {
+  contactName?: string;
+  contactPhone?: string;
+  adminNotes?: string;
+  tlComments?: string;
+  tlClosedAt?: string;
+  adminApprovedAt?: string;
+}
 
 export interface TimelineEntry {
   id: string;
@@ -29,20 +60,30 @@ export interface TimelineEntry {
 }
 
 interface DemoState {
-  events: MalEvent[];
+  events: MalEventExtended[];
   costumes: Costume[];
   gear: GearItem[];
   load: LoadRow[];
   timeline: TimelineEntry[];
   availability: Record<string, AvailabilityResponse | undefined>;
+  bolle: Bolla[];
+  bollaItemsState: Record<string, BollaItemStatus | undefined>;
   setAvailability: (eventId: string, response: AvailabilityResponse) => void;
   setAvailabilityResponse: (eventId: string, response: AvailabilityResponse) => void;
   clearAvailabilityResponse: (eventId: string) => void;
   addCostume: (costume: Omit<Costume, "id" | "verification" | "owner">) => void;
   updateLoadRow: (id: string, patch: Partial<LoadRow>, note?: string) => void;
+  addBolla: (bolla: Bolla) => void;
+  closeBolla: (bollaCode: string) => void;
+  reopenBolla: (bollaCode: string) => void;
+  setBollaTeamLeader: (bollaCode: string, collaboratorId: string) => void;
+  setBollaItemStatus: (itemId: string, status: BollaItemStatus) => void;
+  updateEvent: (code: string, updates: Partial<MalEventExtended>) => void;
+  closeEventByTL: (code: string, comments?: string) => void;
+  approveEventClosure: (code: string) => void;
 }
 
-const STORAGE_KEY = "malastrana-demo-v1";
+const STORAGE_KEY = "malastrana-demo-v2";
 
 const DemoContext = createContext<DemoState | null>(null);
 
@@ -51,6 +92,9 @@ interface Persisted {
   costumes: Costume[];
   load: LoadRow[];
   timeline: TimelineEntry[];
+  bolle: Bolla[];
+  bollaItemsState: Record<string, BollaItemStatus | undefined>;
+  events: MalEventExtended[];
 }
 
 const initial: Persisted = {
@@ -58,6 +102,15 @@ const initial: Persisted = {
   costumes: COSTUMES,
   load: LOAD_ROWS,
   timeline: [],
+  bolle: [],
+  bollaItemsState: {},
+  events: EVENTS.map((e) => ({
+    ...e,
+    contactName: "",
+    contactPhone: "",
+    adminNotes: "",
+    tlComments: "",
+  })),
 };
 
 export function DemoProvider({ children }: { children: ReactNode }) {
@@ -127,21 +180,109 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const addBolla = useCallback((bolla: Bolla) => {
+    setState((s) => ({ ...s, bolle: [...s.bolle, bolla] }));
+  }, []);
+
+  const closeBolla = useCallback((bollaCode: string) => {
+    setState((s) => ({
+      ...s,
+      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, closed: true } : b)),
+    }));
+  }, []);
+
+  const reopenBolla = useCallback((bollaCode: string) => {
+    setState((s) => ({
+      ...s,
+      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, closed: false } : b)),
+    }));
+  }, []);
+
+  const setBollaTeamLeader = useCallback((bollaCode: string, collaboratorId: string) => {
+    setState((s) => ({
+      ...s,
+      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, teamLeaderId: collaboratorId } : b)),
+    }));
+  }, []);
+
+  const setBollaItemStatus = useCallback((itemId: string, status: BollaItemStatus) => {
+    setState((s) => ({
+      ...s,
+      bollaItemsState: { ...s.bollaItemsState, [itemId]: status },
+    }));
+  }, []);
+
+  const updateEvent = useCallback((code: string, updates: Partial<MalEventExtended>) => {
+    setState((s) => ({
+      ...s,
+      events: s.events.map((e) => (e.code === code ? { ...e, ...updates } : e)),
+    }));
+  }, []);
+
+  const closeEventByTL = useCallback((code: string, comments?: string) => {
+    setState((s) => ({
+      ...s,
+      events: s.events.map((e) =>
+        e.code === code
+          ? {
+              ...e,
+              status: "chiuso" as EventStatus,
+              tlComments: comments || "",
+              tlClosedAt: new Date().toISOString(),
+            }
+          : e,
+      ),
+    }));
+  }, []);
+
+  const approveEventClosure = useCallback((code: string) => {
+    setState((s) => ({
+      ...s,
+      events: s.events.map((e) =>
+        e.code === code ? { ...e, adminApprovedAt: new Date().toISOString() } : e,
+      ),
+    }));
+  }, []);
+
   const value = useMemo<DemoState>(
     () => ({
-      events: EVENTS,
+      events: state.events,
       gear: GEAR,
       costumes: state.costumes,
       load: state.load,
       timeline: state.timeline,
       availability: state.availability,
+      bolle: state.bolle,
+      bollaItemsState: state.bollaItemsState,
       setAvailability,
       setAvailabilityResponse: setAvailability,
       clearAvailabilityResponse,
       addCostume,
       updateLoadRow,
+      addBolla,
+      closeBolla,
+      reopenBolla,
+      setBollaTeamLeader,
+      setBollaItemStatus,
+      updateEvent,
+      closeEventByTL,
+      approveEventClosure,
     }),
-    [state, setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow],
+    [
+      state,
+      setAvailability,
+      clearAvailabilityResponse,
+      addCostume,
+      updateLoadRow,
+      addBolla,
+      closeBolla,
+      reopenBolla,
+      setBollaTeamLeader,
+      setBollaItemStatus,
+      updateEvent,
+      closeEventByTL,
+      approveEventClosure,
+    ],
   );
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
