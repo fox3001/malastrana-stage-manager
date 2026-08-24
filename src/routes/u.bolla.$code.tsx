@@ -26,8 +26,14 @@ function BollaDettaglio() {
     );
   }
 
+  // Demo: user corrente = primo collaboratore
+  const currentUserId = COLLABORATORS[0]?.id;
+  const isTeamLeader = bolla.teamLeaderId === currentUserId;
+  const isAdmin = false; // da sostituire con logica reale
+  const canEdit = isTeamLeader || isAdmin;
+
   // Demo: mostro solo se l'utente è "confermato" all'evento collegato
-  const userConfirmed = true; // da sostituire con logica reale
+  const userConfirmed = true;
 
   if (!userConfirmed) {
     return (
@@ -57,7 +63,11 @@ function BollaDettaglio() {
       <section className="mt-6 px-3">
         <SectionTitle>Controllo materiale</SectionTitle>
         <p className="mb-3 text-sm text-muted-foreground">
-          Segna lo stato di ogni voce prima e dopo l'evento.
+          {bolla.closed
+            ? "Bolla chiusa. Solo il team leader o un admin possono modificare."
+            : canEdit
+            ? "Segna lo stato di ogni voce prima e dopo l'evento."
+            : "Solo il team leader o un admin possono modificare la bolla."}
         </p>
         <ul className="border-t border-border">
           {bolla.items.map((item) => {
@@ -82,9 +92,12 @@ function BollaDettaglio() {
                     <select
                       value={status || ""}
                       onChange={(e) =>
-                        setBollaItemStatus(item.id, e.target.value as any)
+                        canEdit && !bolla.closed
+                          ? setBollaItemStatus(item.id, e.target.value as any)
+                          : null
                       }
-                      className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      disabled={!canEdit || bolla.closed}
+                      className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
                     >
                       <option value="">Da verificare</option>
                       <option value="presente">✅ Presente</option>
@@ -122,3 +135,8 @@ function BollaDettaglio() {
     </AppShell>
   );
 }
+
+const COLLABORATORS = [
+  { id: "c1", name: "Collaboratore 1", role: "Attore" },
+  { id: "c2", name: "Collaboratore 2", role: "Tecnico" },
+];
