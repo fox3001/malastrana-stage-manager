@@ -1,69 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, Home, LogOut, Menu, X } from "lucide-react";
+import { Bell, Home, Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-export interface AppShellProps {
-  area: "admin" | "u";
-  title: string;
-  children: ReactNode;
-  back?: string;
-}
+export interface AppShellProps { area: "admin" | "u"; title: string; children: ReactNode; back?: string; }
 
 export function AppShell({ area, title, children, back }: AppShellProps) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const isHome = location.pathname === "/";
-
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-3 py-3">
-          <div className="flex items-center gap-3">
-            <Link to="/" aria-label="Torna al login" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted">
-              <Home className="h-5 w-5" strokeWidth={1.5} />
-            </Link>
-            {back && (
-              <Link to={back} aria-label="Indietro" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted">
-                ←
-              </Link>
-            )}
-            <div>
-              <p className="eyebrow text-xs text-accent">{area === "admin" ? "Ufficio" : "Area personale"}</p>
-              <h1 className="font-serif text-xl text-primary">{title}</h1>
-            </div>
-          </div>
-          <button onClick={() => setOpen((v) => !v)} className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted md:hidden" aria-label="Menu">
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-      </header>
-
-      <nav className={`mx-auto hidden max-w-5xl px-3 py-2 md:block ${open ? "block" : "hidden"}`}>
-        <ul className="flex flex-wrap items-center gap-2">
-          <li><Link to="/" className={`rounded-md px-3 py-2 text-sm font-semibold ${isHome ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Login</Link></li>
-          <li><Link to="/admin" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/admin") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Ufficio</Link></li>
-          <li><Link to="/u" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/u") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Collaboratore</Link></li>
-        </ul>
-      </nav>
-
-      <main className="mx-auto max-w-5xl pb-24 pt-4">{children}</main>
-
-      <footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-surface/95 backdrop-blur md:hidden">
-        <div className="mx-auto flex max-w-5xl items-center justify-around px-3 py-2">
-          <Link to="/" className={`flex flex-col items-center gap-1 px-3 py-1 ${isHome ? "text-primary" : "text-muted-foreground"}`}>
-            <Home className="h-5 w-5" strokeWidth={1.5} />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Login</span>
-          </Link>
-          <Link to="/admin" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"}`}>
-            <LogOut className="h-5 w-5" strokeWidth={1.5} />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Ufficio</span>
-          </Link>
-          <Link to="/u" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/u") ? "text-primary" : "text-muted-foreground"}`}>
-            <Bell className="h-5 w-5" strokeWidth={1.5} />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Collaboratore</span>
-          </Link>
-        </div>
-      </footer>
-    </div>
-  );
+  return <div className="min-h-screen bg-background"><header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur"><div className="mx-auto flex max-w-5xl items-center justify-between px-3 py-3"><div className="flex items-center gap-3"><Link to="/" aria-label="Torna alla selezione Admin o Utente" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted"><Home className="h-5 w-5" strokeWidth={1.5} /></Link>{back && <Link to={back} aria-label="Indietro" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted">←</Link>}<div><p className="eyebrow text-xs text-accent">{area === "admin" ? "Ufficio" : "Area personale"}</p><h1 className="font-serif text-xl text-primary">{title}</h1></div></div><button onClick={() => setOpen((value) => !value)} className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted md:hidden" aria-label="Menu">{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button></div></header><nav className={`mx-auto max-w-5xl px-3 py-2 ${open ? "block" : "hidden md:block"}`}><ul className="flex flex-wrap items-center gap-2"><li><Link to="/" className="rounded-md px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted">Selezione area</Link></li><li><Link to="/admin" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/admin") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Admin</Link></li><li><Link to="/u" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/u") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Utente</Link></li></ul></nav><main className="mx-auto max-w-5xl pb-24 pt-4">{children}</main><footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-surface/95 backdrop-blur md:hidden"><div className="mx-auto flex max-w-5xl items-center justify-around px-3 py-2"><Link to="/" className="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground"><Home className="h-5 w-5" strokeWidth={1.5} /><span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Aree</span></Link><Link to="/admin" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"}`}><span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Admin</span></Link><Link to="/u" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/u") ? "text-primary" : "text-muted-foreground"}`}><Bell className="h-5 w-5" strokeWidth={1.5} /><span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Utente</span></Link></div></footer></div>;
 }
