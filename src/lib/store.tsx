@@ -22,6 +22,8 @@ export interface Bolla {
   date: string;
   eventCode: string;
   items: BollaItem[];
+  closed: boolean;
+  teamLeaderId?: string;
 }
 
 export interface DemoState {
@@ -35,6 +37,9 @@ export interface DemoState {
   clearAvailabilityResponse: (eventId: string) => void;
   setBollaItemStatus: (itemId: string, status: BollaItemStatus) => void;
   addBolla: (bolla: Bolla) => void;
+  closeBolla: (bollaCode: string) => void;
+  reopenBolla: (bollaCode: string) => void;
+  setBollaTeamLeader: (bollaCode: string, collaboratorId: string) => void;
 }
 
 export const useDemo = create<DemoState>((set) => ({
@@ -71,6 +76,27 @@ export const useDemo = create<DemoState>((set) => ({
   addBolla: (bolla) =>
     set((state) => ({
       bolle: [...state.bolle, bolla],
+    })),
+
+  closeBolla: (bollaCode) =>
+    set((state) => ({
+      bolle: state.bolle.map((b) =>
+        b.code === bollaCode ? { ...b, closed: true } : b,
+      ),
+    })),
+
+  reopenBolla: (bollaCode) =>
+    set((state) => ({
+      bolle: state.bolle.map((b) =>
+        b.code === bollaCode ? { ...b, closed: false } : b,
+      ),
+    })),
+
+  setBollaTeamLeader: (bollaCode, collaboratorId) =>
+    set((state) => ({
+      bolle: state.bolle.map((b) =>
+        b.code === bollaCode ? { ...b, teamLeaderId: collaboratorId } : b,
+      ),
     })),
 }));
 
