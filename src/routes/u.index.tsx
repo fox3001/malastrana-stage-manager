@@ -7,6 +7,7 @@ import {
   SectionTitle,
   StatusTag,
 } from "@/components/ui-kit";
+import { CollaboratorAvatar } from "@/components/CollaboratorAvatar";
 import { useDemo } from "@/lib/store";
 import { CURRENT_USER, NOTIFICATIONS, formatDate } from "@/data/demo";
 import { Boxes, CalendarDays, ClipboardList, Shirt } from "lucide-react";
@@ -52,12 +53,19 @@ function HomeCollaboratore() {
 
   return (
     <AppShell area="user" title="Home" notifications={NOTIFICATIONS.length}>
-      <section className="px-3 pt-6">
-        <p className="eyebrow text-muted-foreground">Benvenuta</p>
-        <h2 className="mt-1 font-serif text-3xl text-primary">
-          Ciao, {CURRENT_USER.name.split(" ")[0]?.toUpperCase()}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{CURRENT_USER.role}</p>
+      <section className="flex items-center gap-4 px-3 pt-6">
+        <CollaboratorAvatar
+          name={CURRENT_USER.name}
+          role={CURRENT_USER.role}
+          size={88}
+        />
+        <div>
+          <p className="eyebrow text-muted-foreground">Benvenuta</p>
+          <h2 className="mt-1 font-serif text-3xl text-primary">
+            Ciao, {CURRENT_USER.name.split(" ")[0]?.toUpperCase()}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{CURRENT_USER.role}</p>
+        </div>
       </section>
 
       {next && (
