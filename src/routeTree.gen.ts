@@ -7,6 +7,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as IndexRoute } from './routes/index'
 import { Route as AdminIndexRoute } from './routes/admin.index'
 import { Route as AdminNotificheRoute } from './routes/admin.notifiche'
+import { Route as AdminBolleIndexRoute } from './routes/admin.bolle.index'
+import { Route as AdminBolleCodeRoute } from './routes/admin.bolle.$code'
 import { Route as AdminEventiIndexRoute } from './routes/admin.eventi.index'
 import { Route as AdminEventiCodeRoute } from './routes/admin.eventi.$code'
 import { Route as AdminEventiNuovoRoute } from './routes/admin.eventi.nuovo'
@@ -82,6 +84,36 @@ const adminNotificheRoute = CreateFileRoute('/admin/notifiche')({
     children: [],
     id: '/admin/notifiche',
     path: '/admin/notifiche',
+    validateSearch: undefined,
+    parseParams: undefined,
+    stringifyParams: undefined,
+    validateParams: undefined,
+  },
+  parentRoute: rootRoute,
+})
+
+const adminBolleIndexRoute = CreateFileRoute('/admin/bolle/')({
+  component: AdminBolleIndexRoute.default,
+  route: {
+    __types: {},
+    children: [],
+    id: '/admin/bolle/',
+    path: '/admin/bolle',
+    validateSearch: undefined,
+    parseParams: undefined,
+    stringifyParams: undefined,
+    validateParams: undefined,
+  },
+  parentRoute: rootRoute,
+})
+
+const adminBolleCodeRoute = CreateFileRoute('/admin/bolle/$code')({
+  component: AdminBolleCodeRoute.default,
+  route: {
+    __types: {},
+    children: [],
+    id: '/admin/bolle/$code',
+    path: '/admin/bolle/$code',
     validateSearch: undefined,
     parseParams: undefined,
     stringifyParams: undefined,
@@ -379,6 +411,8 @@ rootRoute.addChildren([
   indexRoute,
   adminIndexRoute,
   adminNotificheRoute,
+  adminBolleIndexRoute,
+  adminBolleCodeRoute,
   adminEventiIndexRoute,
   adminEventiCodeRoute,
   adminEventiNuovoRoute,
