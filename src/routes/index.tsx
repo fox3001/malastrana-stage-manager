@@ -1,85 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DemoNote } from "@/components/ui-kit";
-import { ShieldCheck, User } from "lucide-react";
+import { ShieldCheck, UserRound } from "lucide-react";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Malastrana — Eventi senza tempo" },
-      {
-        name: "description",
-        content:
-          "Ingresso al prototipo UI del gestionale Malastrana: area collaboratore demo e area admin demo.",
-      },
-      { property: "og:title", content: "Malastrana — Eventi senza tempo" },
-      {
-        property: "og:description",
-        content: "Prototipo UI del gestionale interno Malastrana Eventi.",
-      },
-      { property: "og:url", content: "/" },
-    ],
-    links: [{ rel: "canonical", href: "/" }],
-  }),
-  component: Ingresso,
-});
+export const Route = createFileRoute("/")({ component: Home });
 
-function Ingresso() {
-  return (
-    <div className="flex min-h-screen flex-col justify-between bg-background px-safe pb-safe pt-safe">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
-        <div className="flex flex-col items-center">
-          <img
-            src="/malastrana-logo.png"
-            alt="Malastrana App"
-            className="h-auto w-full max-w-[17rem] object-contain sm:max-w-[20rem]"
-          />
-        </div>
-
-        <div className="mt-14">
-          <p className="eyebrow text-center text-muted-foreground">Chi sei?</p>
-
-          <div className="mt-5 space-y-3">
-            <Link
-              to="/u"
-              className="flex min-h-16 items-center gap-4 border border-primary bg-primary px-5 text-primary-foreground active:opacity-80"
-            >
-              <User className="h-5 w-5 shrink-0" strokeWidth={1.4} />
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold uppercase tracking-[0.14em]">
-                  Utente
-                </span>
-                <span className="block text-xs opacity-80">
-                  Area collaboratore dimostrativa
-                </span>
-              </span>
-            </Link>
-
-            <Link
-              to="/admin"
-              className="flex min-h-16 items-center gap-4 border border-accent bg-surface px-5 text-foreground active:opacity-80"
-            >
-              <ShieldCheck className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.4} />
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold uppercase tracking-[0.14em] text-accent">
-                  Admin
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  Area organizzazione dimostrativa
-                </span>
-              </span>
-            </Link>
-          </div>
-
-          <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
-            La scelta è solo un ingresso visuale: non esiste login, non esiste
-            autenticazione e non sono attivi ruoli o permessi reali.
-          </p>
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-md px-6 pb-8">
-        <DemoNote />
-      </div>
-    </div>
-  );
+function Home() {
+  return <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10"><div className="text-center"><div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-full border-4 border-primary text-4xl font-serif text-primary">M</div><h1 className="font-serif text-4xl text-primary">Malastrana</h1><p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Stage Manager</p><p className="mt-12 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Chi sei?</p></div><div className="mt-6 grid gap-4"><Link to="/u" className="flex items-center gap-4 border border-accent bg-accent px-5 py-5 text-white shadow-sm"><UserRound className="h-6 w-6" strokeWidth={1.5} /><span><span className="block text-base font-semibold uppercase tracking-[0.1em]">Utente</span><span className="mt-1 block text-sm text-white/85">Area collaboratore dimostrativa</span></span></Link><Link to="/admin" className="flex items-center gap-4 border border-primary bg-primary px-5 py-5 text-white shadow-sm"><ShieldCheck className="h-6 w-6" strokeWidth={1.5} /><span><span className="block text-base font-semibold uppercase tracking-[0.1em]">Admin</span><span className="mt-1 block text-sm text-white/85">Ufficio & Regia dimostrativa</span></span></Link></div><p className="mt-8 text-center text-sm leading-6 text-muted-foreground">La scelta è solo un ingresso visuale: non esiste login, non esiste autenticazione e non sono attivi ruoli o permessi reali.</p></main>;
 }
