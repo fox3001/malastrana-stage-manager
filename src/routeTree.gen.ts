@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MalamexRouteImport } from './routes/malamex'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAltroRouteImport } from './routes/admin.altro'
 import { Route as AdminCalendarioRouteImport } from './routes/admin.calendario'
@@ -34,6 +35,11 @@ import { Route as AdminCollaboratoriIdDisponibilitaRouteImport } from './routes/
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MalamexRoute = MalamexRouteImport.update({
+  id: '/malamex',
+  path: '/malamex',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -140,6 +146,7 @@ const AdminCollaboratoriIdDisponibilitaRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/malamex': typeof MalamexRoute
   '/admin/altro': typeof AdminAltroRoute
   '/admin/calendario': typeof AdminCalendarioRoute
   '/admin/costumi': typeof AdminCostumiRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/malamex': typeof MalamexRoute
   '/admin/altro': typeof AdminAltroRoute
   '/admin/calendario': typeof AdminCalendarioRoute
   '/admin/costumi': typeof AdminCostumiRoute
@@ -187,6 +195,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/malamex': typeof MalamexRoute
   '/admin/altro': typeof AdminAltroRoute
   '/admin/calendario': typeof AdminCalendarioRoute
   '/admin/costumi': typeof AdminCostumiRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/malamex'
     | '/admin/altro'
     | '/admin/calendario'
     | '/admin/costumi'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/malamex'
     | '/admin/altro'
     | '/admin/calendario'
     | '/admin/costumi'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/malamex'
     | '/admin/altro'
     | '/admin/calendario'
     | '/admin/costumi'
@@ -282,6 +294,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MalamexRoute: typeof MalamexRoute
   AdminAltroRoute: typeof AdminAltroRoute
   AdminCalendarioRoute: typeof AdminCalendarioRoute
   AdminCostumiRoute: typeof AdminCostumiRoute
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/malamex': {
+      id: '/malamex'
+      path: '/malamex'
+      fullPath: '/malamex'
+      preLoaderRoute: typeof MalamexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -469,6 +489,7 @@ const AdminCollaboratoriIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MalamexRoute: MalamexRoute,
   AdminAltroRoute: AdminAltroRoute,
   AdminCalendarioRoute: AdminCalendarioRoute,
   AdminCostumiRoute: AdminCostumiRoute,
