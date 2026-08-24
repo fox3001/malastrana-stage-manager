@@ -45,15 +45,16 @@ function CostumiPage() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
+    const tagList = tags
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map((t) => (t.startsWith("#") ? t : `#${t}`));
     addCostume({
       name: name.trim(),
       category,
-      character: character.trim() || undefined,
-      tags: tags
-        .split(/[\s,]+/)
-        .filter(Boolean)
-        .map((t) => (t.startsWith("#") ? t : `#${t}`)),
-      notes: notes.trim() || undefined,
+      tags: tagList,
+      ...(character.trim() ? { character: character.trim() } : {}),
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
     });
     setName("");
     setCharacter("");

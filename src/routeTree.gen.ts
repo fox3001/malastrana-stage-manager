@@ -12,7 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIndexRouteImport } from './routes/u.index'
 import { Route as UCalendarioRouteImport } from './routes/u.calendario'
+import { Route as UCostumiRouteImport } from './routes/u.costumi'
+import { Route as UMaterialeRouteImport } from './routes/u.materiale'
+import { Route as UNotificheRouteImport } from './routes/u.notifiche'
 import { Route as UProfiloRouteImport } from './routes/u.profilo'
+import { Route as UBollaCodeRouteImport } from './routes/u.bolla.$code'
 import { Route as UEventiIndexRouteImport } from './routes/u.eventi.index'
 import { Route as UEventiCodeRouteImport } from './routes/u.eventi.$code'
 
@@ -31,9 +35,29 @@ const UCalendarioRoute = UCalendarioRouteImport.update({
   path: '/u/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UCostumiRoute = UCostumiRouteImport.update({
+  id: '/u/costumi',
+  path: '/u/costumi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UMaterialeRoute = UMaterialeRouteImport.update({
+  id: '/u/materiale',
+  path: '/u/materiale',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UNotificheRoute = UNotificheRouteImport.update({
+  id: '/u/notifiche',
+  path: '/u/notifiche',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UProfiloRoute = UProfiloRouteImport.update({
   id: '/u/profilo',
   path: '/u/profilo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UBollaCodeRoute = UBollaCodeRouteImport.update({
+  id: '/u/bolla/$code',
+  path: '/u/bolla/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UEventiIndexRoute = UEventiIndexRouteImport.update({
@@ -50,16 +74,24 @@ const UEventiCodeRoute = UEventiCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/u/calendario': typeof UCalendarioRoute
+  '/u/costumi': typeof UCostumiRoute
+  '/u/materiale': typeof UMaterialeRoute
+  '/u/notifiche': typeof UNotificheRoute
   '/u/profilo': typeof UProfiloRoute
   '/u/': typeof UIndexRoute
+  '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/u/calendario': typeof UCalendarioRoute
+  '/u/costumi': typeof UCostumiRoute
+  '/u/materiale': typeof UMaterialeRoute
+  '/u/notifiche': typeof UNotificheRoute
   '/u/profilo': typeof UProfiloRoute
   '/u': typeof UIndexRoute
+  '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi': typeof UEventiIndexRoute
 }
@@ -67,8 +99,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/u/calendario': typeof UCalendarioRoute
+  '/u/costumi': typeof UCostumiRoute
+  '/u/materiale': typeof UMaterialeRoute
+  '/u/notifiche': typeof UNotificheRoute
   '/u/profilo': typeof UProfiloRoute
   '/u/': typeof UIndexRoute
+  '/u/bolla/$code': typeof UBollaCodeRoute
   '/u/eventi/$code': typeof UEventiCodeRoute
   '/u/eventi/': typeof UEventiIndexRoute
 }
@@ -77,24 +113,36 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/u/calendario'
+    | '/u/costumi'
+    | '/u/materiale'
+    | '/u/notifiche'
     | '/u/profilo'
     | '/u/'
+    | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/u/eventi/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/u/calendario'
+    | '/u/costumi'
+    | '/u/materiale'
+    | '/u/notifiche'
     | '/u/profilo'
     | '/u'
+    | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/u/eventi'
   id:
     | '__root__'
     | '/'
     | '/u/calendario'
+    | '/u/costumi'
+    | '/u/materiale'
+    | '/u/notifiche'
     | '/u/profilo'
     | '/u/'
+    | '/u/bolla/$code'
     | '/u/eventi/$code'
     | '/u/eventi/'
   fileRoutesById: FileRoutesById
@@ -102,8 +150,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UCalendarioRoute: typeof UCalendarioRoute
+  UCostumiRoute: typeof UCostumiRoute
+  UMaterialeRoute: typeof UMaterialeRoute
+  UNotificheRoute: typeof UNotificheRoute
   UProfiloRoute: typeof UProfiloRoute
   UIndexRoute: typeof UIndexRoute
+  UBollaCodeRoute: typeof UBollaCodeRoute
   UEventiCodeRoute: typeof UEventiCodeRoute
   UEventiIndexRoute: typeof UEventiIndexRoute
 }
@@ -131,11 +183,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/costumi': {
+      id: '/u/costumi'
+      path: '/u/costumi'
+      fullPath: '/u/costumi'
+      preLoaderRoute: typeof UCostumiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/materiale': {
+      id: '/u/materiale'
+      path: '/u/materiale'
+      fullPath: '/u/materiale'
+      preLoaderRoute: typeof UMaterialeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/notifiche': {
+      id: '/u/notifiche'
+      path: '/u/notifiche'
+      fullPath: '/u/notifiche'
+      preLoaderRoute: typeof UNotificheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/profilo': {
       id: '/u/profilo'
       path: '/u/profilo'
       fullPath: '/u/profilo'
       preLoaderRoute: typeof UProfiloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/bolla/$code': {
+      id: '/u/bolla/$code'
+      path: '/u/bolla/$code'
+      fullPath: '/u/bolla/$code'
+      preLoaderRoute: typeof UBollaCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/eventi/': {
@@ -158,8 +238,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UCalendarioRoute: UCalendarioRoute,
+  UCostumiRoute: UCostumiRoute,
+  UMaterialeRoute: UMaterialeRoute,
+  UNotificheRoute: UNotificheRoute,
   UProfiloRoute: UProfiloRoute,
   UIndexRoute: UIndexRoute,
+  UBollaCodeRoute: UBollaCodeRoute,
   UEventiCodeRoute: UEventiCodeRoute,
   UEventiIndexRoute: UEventiIndexRoute,
 }
