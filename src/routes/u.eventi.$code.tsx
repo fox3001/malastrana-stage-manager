@@ -1,129 +1,86 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
-import { SectionTitle, StatusTag } from "@/components/ui-kit";
-import { useDemo } from "@/lib/store";
-import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, ShieldCheck, UserRound, XCircle } from "lucide-react";
+import { ChevronLeft, ShieldCheck, Star } from "lucide-react";
+import { getEventByCode, getAvailabilityForEvent } from "../data/demo";
 
 export const Route = createFileRoute("/u/eventi/$code")({
-  component: EventoUtenteDettaglio,
+  component: UserEventDetail,
 });
 
-function EventoUtenteDettaglio() {
+function UserEventDetail() {
   const { code } = Route.useParams();
-  const { events, collaborators, availability, setAvailabilityResponse } = useDemo();
-  const event = events.find((item) => item.code === code);
-  const currentUser = collaborators.find((c) => c.id === "col-elena") || collaborators[0];
+  const event = getEventByCode(code);
+  const availability = getAvailabilityForEvent(code);
 
-  if (!event || !currentUser) {
+  const currentUserId = "c1";
+  const myEntry = availability.find((a) => a.userId === currentUserId);
+
+  if (!event) {
     return (
-      <AppShell area="u" title="Evento" back="/u/eventi">
-        <section className="px-3 pt-6"><p className="text-sm text-muted-foreground">Evento non trovato.</p></section>
-      </AppShell>
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <p className="text-muted-foreground">Evento non trovato.</p>
+        <Link to="/u/eventi" className="mt-4 text-sm text-primary hover:underline">
+          Torna agli eventi
+        </Link>
+      </div>
     );
   }
 
-  const teamMember = event.team?.find((member) => member.collaboratorId === currentUser.id);
-  const isTeamLeader = Boolean(teamMember?.isTeamLeader);
-  const response = availability[event.id];
-  const canRespond = event.status === "richiesta" || event.status === "da_definire";
+  const isConfirmed = !!myEntry?.confirmed;
+  const isTL = !!myEntry?.isTL;
 
   return (
-    <AppShell area="u" title="Evento" back="/u/eventi">
-      <section className="px-3 pt-6">
-        <p className="eyebrow text-accent">Evento</p>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="mt-1 font-serif text-3xl text-primary">{event.name}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{event.type}</p>
-          </div>
-          <StatusTag status={event.status} />
-        </div>
-        {isTeamLeader && (
-          <div className="mt-3 inline-flex items-center gap-2 border border-accent bg-accent/10 px-3 py-2 text-sm font-semibold text-accent">
-            <ShieldCheck className="h-4 w-4" /> Team Leader
-          </div>
-        )}
-      </section>
+    <main className="mx-auto min-h-screen max-w-3xl px-6 py-10">
+      <Link to="/u/eventi" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <ChevronLeft className="h-4 w-4" />
+        Torna agli eventi
+      </Link>
 
-      <section className="mt-6 px-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Info icon={CalendarDays} label="Data" value={event.date} />
-          <Info icon={Clock} label="Orario" value={`${event.timeStart}–${event.timeEnd}`} />
-          <Info icon={MapPin} label="Luogo" value={event.place} />
-          <Info icon={UserRound} label="Stato" value={<StatusTag status={event.status} />} />
-        </div>
-      </section>
+      <header className="mb-8">
+        <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {event.date} • {event.location}
+        </p>
+      </header>
 
-      {canRespond && (
-        <section className="mt-6 px-3">
-          <SectionTitle>La tua disponibilità</SectionTitle>
-          <div className="border border-border bg-surface p-4">
-            {response ? (
-              <p className="flex items-center gap-2 text-sm text-foreground">
-                {response === "disponibile" || response === "yes" ? <CheckCircle2 className="h-5 w-5 text-accent" /> : <XCircle className="h-5 w-5 text-muted-foreground" />}
-                Risposta registrata: <strong>{response.replace("_", " ")}</strong>
-              </p>
-            ) : (
-              <div>
-                <p className="text-sm text-foreground">Puoi partecipare a questo evento?</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button onClick={() => setAvailabilityResponse(event.id, "disponibile")} className="inline-flex min-h-9 items-center gap-2 border border-primary bg-primary px-3 text-xs font-semibold uppercase tracking-[0.08em] text-white">
-                    <CheckCircle2 className="h-4 w-4" /> Disponibile
-                  </button>
-                  <button onClick={() => setAvailabilityResponse(event.id, "non_disponibile")} className="inline-flex min-h-9 items-center gap-2 border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground">
-                    <XCircle className="h-4 w-4" /> Non disponibile
-                  </button>
-                  <button onClick={() => setAvailabilityResponse(event.id, "da_definire")} className="inline-flex min-h-9 items-center border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground">
-                    Da definire
-                  </button>
-                </div>
+      {isConfirmed ? (
+        <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            <h2 className="text-base font-semibold">Il tuo stato per questo evento</h2>
+          </div>
+          <div className="flex items-center gap-3 rounded-md border p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <ShieldCheck className="h-6 w-6" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Sei confermato come animatore</p>
+              <p className="text-xs text-muted-foreground">L'ufficio ti ha inserito tra gli animatori per questo evento.</p>
+            </div>
+            {isTL && (
+              <div className="ml-auto flex items-center gap-1.5 rounded-full bg-yellow-400/15 px-2.5 py-1 text-xs font-medium text-yellow-500">
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                Team Leader
               </div>
             )}
           </div>
         </section>
-      )}
-
-      {teamMember && (
-        <section className="mt-6 px-3">
-          <SectionTitle>La tua convocazione</SectionTitle>
-          <div className="border border-border bg-surface p-4">
-            <p className="eyebrow text-muted-foreground">Ruolo</p>
-            <p className="mt-1 text-sm text-foreground">{teamMember.role}</p>
-            {event.assignment?.callTime && <><p className="eyebrow mt-4 text-muted-foreground">Convocazione</p><p className="mt-1 text-sm text-foreground">{event.assignment.callTime}</p></>}
-            {event.assignment?.dressCode && <><p className="eyebrow mt-4 text-muted-foreground">Abbigliamento</p><p className="mt-1 text-sm text-foreground">{event.assignment.dressCode}</p></>}
-            {event.assignment?.instructions && <><p className="eyebrow mt-4 text-muted-foreground">Istruzioni</p><p className="mt-1 text-sm text-foreground">{event.assignment.instructions}</p></>}
+      ) : (
+        <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+            <h2 className="text-base font-semibold">Il tuo stato per questo evento</h2>
+          </div>
+          <div className="flex items-center gap-3 rounded-md border p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <ShieldCheck className="h-6 w-6" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Non sei ancora confermato</p>
+              <p className="text-xs text-muted-foreground">Hai segnalato disponibilità, ma l'ufficio non ti ha ancora confermato.</p>
+            </div>
           </div>
         </section>
       )}
-
-      {event.contactName && (
-        <section className="mt-6 px-3">
-          <SectionTitle>Contatto in location</SectionTitle>
-          <div className="border border-border bg-surface p-4">
-            <p className="text-sm text-foreground">{event.contactName}</p>
-            {event.contactPhone && <a href={`tel:${event.contactPhone}`} className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-accent"><Phone className="h-4 w-4" /> {event.contactPhone}</a>}
-          </div>
-        </section>
-      )}
-
-      <section className="mt-6 px-3">
-        <SectionTitle>Informazioni evento</SectionTitle>
-        <div className="border border-border bg-surface p-4">
-          <p className="text-sm text-foreground">{event.publicInfo}</p>
-        </div>
-      </section>
-
-      {isTeamLeader && (
-        <section className="mt-6 px-3">
-          <Link to="/u/bolla/$code" params={{ code: event.code }} className="inline-flex min-h-10 items-center border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-white">
-            Apri controllo bolla
-          </Link>
-        </section>
-      )}
-    </AppShell>
+    </main>
   );
-}
-
-function Info({ icon: Icon, label, value }: { icon: typeof CalendarDays; label: string; value: React.ReactNode }) {
-  return <div className="border border-border bg-surface p-3"><Icon className="h-4 w-4 text-primary" strokeWidth={1.5} /><p className="eyebrow mt-2 text-xs text-muted-foreground">{label}</p><div className="mt-1 text-sm text-foreground">{value}</div></div>;
 }

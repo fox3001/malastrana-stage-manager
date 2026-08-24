@@ -1,104 +1,147 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
-import { SectionTitle, StatusTag } from "@/components/ui-kit";
-import { useDemo } from "@/lib/store";
-import { COLLABORATORS } from "@/data/demo";
-import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
+import { ChevronLeft, ShieldCheck, UserRound, CheckCircle2, Circle, Star } from "lucide-react";
+import { getEventByCode, getAvailabilityForEvent, confirmAnimator, unconfirmAnimator } from "../data/demo";
 
 export const Route = createFileRoute("/admin/eventi/$code")({
-  component: EventoDettaglio,
+  component: AdminEventDetail,
 });
 
-function EventoDettaglio() {
+function AdminEventDetail() {
   const { code } = Route.useParams();
-  const { events } = useDemo();
-  const event = events.find((e) => e.code === code);
+  const event = getEventByCode(code);
+  const availability = getAvailabilityForEvent(code);
 
   if (!event) {
     return (
-      <AppShell area="admin" title="Evento">
-        <section className="px-3 pt-6">
-          <p className="text-sm text-muted-foreground">Evento non trovato.</p>
-          <Link to="/admin/eventi" className="eyebrow text-accent">
-            Torna alla lista
-          </Link>
-        </section>
-      </AppShell>
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <p className="text-muted-foreground">Evento non trovato.</p>
+        <Link to="/admin/eventi" className="mt-4 text-sm text-primary hover:underline">
+          Torna agli eventi
+        </Link>
+      </div>
     );
   }
 
-  const team = COLLABORATORS.slice(0, 3);
+  const proposed = availability.filter((a) => a.proposed);
+  const confirmed = proposed.filter((a) => a.confirmed);
+
+  function toggleConfirmed(userId: string, currentlyConfirmed: boolean) {
+    if (currentlyConfirmed) {
+      unconfirmAnimator(code, userId);
+    } else {
+      const entry = availability.find((a) => a.userId === userId);
+      confirmAnimator(code, userId, entry?.isTL ?? false);
+    }
+  }
+
+  function toggleTL(userId: string, currentlyTL: boolean) {
+    const entry = availability.find((a) => a.userId === userId);
+    if (!entry) return;
+    entry.isTL = !currentlyTL;
+  }
 
   return (
-    <AppShell area="admin" title="Evento" back="/admin/eventi">
-      <section className="px-3 pt-6">
-        <p className="eyebrow text-accent">Dettaglio</p>
-        <h2 className="mt-1 font-serif text-3xl text-primary">{event.name}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Codice: {event.code}</p>
-      </section>
+    <main className="mx-auto min-h-screen max-w-3xl px-6 py-10">
+      <Link to="/admin/eventi" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <ChevronLeft className="h-4 w-4" />
+        Torna agli eventi
+      </Link>
 
-      <section className="mt-6 px-3">
-        <div className="grid grid-cols-2 gap-2">
-          <InfoCard icon={CalendarDays} label="Data" value={event.date} />
-          <InfoCard icon={Clock} label="Orari" value={`${event.timeStart}–${event.timeEnd}`} />
-          <InfoCard icon={MapPin} label="Luogo" value={event.place} />
-          <InfoCard icon={Users} label="Stato" value={<StatusTag status={event.status} />} />
+      <header className="mb-8">
+        <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {event.date} • {event.location}
+        </p>
+      </header>
+
+      <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center gap-2">
+          <UserRound className="h-5 w-5 text-accent" strokeWidth={1.5} />
+          <h2 className="text-base font-semibold uppercase tracking-[0.08em]">Animatori proposti</h2>
         </div>
+        {proposed.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nessun animatore ha segnato disponibilità per questo evento.</p>
+        ) : (
+          <ul className="space-y-3">
+            {proposed.map((a) => {
+              const isConfirmed = !!a.confirmed;
+              const isTL = !!a.isTL;
+              return (
+                <li key={a.userId} className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent">
+                      <UserRound className="h-5 w-5" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{a.name}</p>
+                      <p className="text-xs text-muted-foreground">Disponibile per questo evento</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => toggleConfirmed(a.userId, isConfirmed)}
+                      className="flex items-center gap-1.5 text-xs font-medium hover:underline"
+                      title={isConfirmed ? "Rimuovi conferma" : "Conferma animatore"}
+                    >
+                      {isConfirmed ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          <span className="text-primary">Confermato</span>
+                        </>
+                      ) : (
+                        <>
+                          <Circle className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Da confermare</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => toggleTL(a.userId, isTL)}
+                      className="flex items-center gap-1.5 text-xs font-medium hover:underline"
+                      title={isTL ? "Rimuovi Team Leader" : "Segna come Team Leader"}
+                    >
+                      <Star className={`h-4 w-4 ${isTL ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
+                      <span className={isTL ? "text-yellow-400" : "text-muted-foreground"}>TL</span>
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
-      <section className="mt-6 px-3">
-        <SectionTitle>Team assegnato</SectionTitle>
-        <ul className="border-t border-border">
-          {team.map((c) => (
-            <li key={c.id}>
-              <Link
-                to="/admin/collaboratori/$id"
-                params={{ id: c.id }}
-                className="flex min-h-14 items-center justify-between gap-3 border-b border-border py-3 active:bg-muted"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-sm text-foreground">{c.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{c.role}</span>
-                </span>
-                <span className="eyebrow shrink-0 text-accent">{c.state}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="mt-6 px-3">
-        <SectionTitle>Materiale previsto</SectionTitle>
-        <div className="border border-border bg-surface p-4">
-          <p className="text-sm text-foreground">
-            Assegnazione costumi e materiali in arrivo (collegata a bolle di carico).
-          </p>
-          <Link
-            to="/admin/costumi"
-            className="mt-3 inline-flex min-h-9 items-center border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground"
-          >
-            Vai a Costumi
-          </Link>
+      <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={1.5} />
+          <h2 className="text-base font-semibold uppercase tracking-[0.08em]">Animatori confermati</h2>
         </div>
+        {confirmed.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nessun animatore confermato per questo evento.</p>
+        ) : (
+          <ul className="space-y-3">
+            {confirmed.map((a) => (
+              <li key={a.userId} className="flex items-center justify-between rounded-md border p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <ShieldCheck className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{a.name}</p>
+                    <p className="text-xs text-muted-foreground">Confermato per questo evento</p>
+                  </div>
+                </div>
+                {a.isTL && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-yellow-400/15 px-2.5 py-1 text-xs font-medium text-yellow-500">
+                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    Team Leader
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
-    </AppShell>
-  );
-}
-
-function InfoCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: any;
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="border border-border bg-surface p-3">
-      <Icon className="h-4 w-4 text-primary" strokeWidth={1.5} />
-      <p className="mt-2 eyebrow text-xs text-muted-foreground">{label}</p>
-      <div className="mt-1 text-sm text-foreground">{value}</div>
-    </div>
+    </main>
   );
 }
