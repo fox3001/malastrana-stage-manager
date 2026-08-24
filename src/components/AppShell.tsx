@@ -49,7 +49,7 @@ export function AppShell({
             {showBack && (
               <button
                 onClick={handleBack}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted"
+                className="hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted sm:flex"
                 aria-label="Indietro"
               >
                 <ChevronLeft className="h-5 w-5" strokeWidth={1.8} />
