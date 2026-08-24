@@ -1,102 +1,100 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { Button, DemoNote, EventRow } from "@/components/ui-kit";
+import { EventRow, SectionTitle, StatusTag } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
-import { STATUS_LABEL, type EventStatus } from "@/data/demo";
-import { cn } from "@/lib/utils";
+import { CalendarDays, Filter } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/admin/eventi/")({
-  head: () => ({
-    meta: [
-      { title: "Eventi — Regia Malastrana" },
-      {
-        name: "description",
-        content: "Elenco eventi lato organizzazione nel prototipo Malastrana.",
-      },
-      { property: "og:title", content: "Eventi — Regia Malastrana" },
-      {
-        property: "og:description",
-        content: "Gestione dimostrativa degli eventi Malastrana.",
-      },
-      { property: "og:url", content: "/admin/eventi" },
-    ],
-    links: [{ rel: "canonical", href: "/admin/eventi" }],
-  }),
-  component: AdminEventi,
+  component: EventiLista,
 });
 
-const FILTERS: Array<{ key: EventStatus | "tutti"; label: string }> = [
-  { key: "tutti", label: "Tutti" },
-  { key: "richiesta", label: STATUS_LABEL.richiesta },
-  { key: "confermato", label: STATUS_LABEL.confermato },
-  { key: "da_definire", label: STATUS_LABEL.da_definire },
-  { key: "annullato", label: STATUS_LABEL.annullato },
-];
+type StatusFilter = "tutti" | "richiesta" | "da_definire" | "confermato" | "annullato";
 
-function AdminEventi() {
+function EventiLista() {
   const { events } = useDemo();
-  const [filter, setFilter] = useState<EventStatus | "tutti">("tutti");
-  const list = events
-    .filter((e) => filter === "tutti" || e.status === filter)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const [filter, setFilter] = useState<StatusFilter>("tutti");
+
+  const filtered = useMemo(() => {
+    const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+    if (filter === "tutti") return sorted;
+    return sorted.filter((e) => e.status === filter);
+  }, [events, filter]);
 
   return (
-    <AppShell area="admin" title="Eventi">
-      <div className="px-3 pt-5">
-        <h2 className="font-serif text-2xl text-foreground">Programmazione</h2>
+    <AppShell area="admin" title="Eventi" back="/admin">
+      <section className="px-3 pt-6">
+        <p className="eyebrow text-accent">Gestione</p>
+        <h2 className="mt-1 font-serif text-3xl text-primary">Eventi</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Apri un evento per vedere cast, materiale e stato delle disponibilità.
+          Lista, filtri e accesso rapido ai dettagli.
         </p>
-        <div className="mt-4">
-          <Button full variant="outline" disabled>
-            Nuovo evento (non attivo)
-          </Button>
-        </div>
-      </div>
+      </section>
 
-      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-3 pb-1">
-        {FILTERS.map((f) => (
+      <section className="mt-6 px-3">
+        <div className="flex items-center gap-2 overflow-x-auto">
           <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={cn(
-              "eyebrow min-h-9 shrink-0 border px-3",
-              filter === f.key
-                ? "border-accent bg-accent text-accent-foreground"
-                : "border-border-strong bg-surface text-muted-foreground",
-            )}
+            onClick={() => setFilter("tutti")}
+            className={`eyebrow rounded-full border px-3 py-1.5 text-xs ${
+              filter === "tutti"
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-surface text-foreground"
+            }`}
           >
-            {f.label}
+            Tutti
           </button>
-        ))}
-      </div>
+          {(["richiesta", "da_definire", "confermato", "annullato"] as StatusFilter[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`eyebrow rounded-full border px-3 py-1.5 text-xs ${
+                filter === s
+                  ? "border-primary bg-primary text-white"
+                  : "border-border bg-surface text-foreground"
+              }`}
+            >
+              {s.replace("_", " ")}
+            </button>
+          ))}
+        </div>
+      </section>
 
-      <div className="mt-4 border-t border-border">
-        {list.length === 0 ? (
-          <p className="px-3 py-6 text-sm text-muted-foreground">
-            Nessun evento per questo filtro.
+      <section className="mt-6 px-3">
+        <SectionTitle
+          action={
+            <span className="eyebrow text-muted-foreground">
+              {filtered.length} risultati
+            </span>
+          }
+        >
+          Lista eventi
+        </SectionTitle>
+        {filtered.length === 0 ? (
+          <p className="border-t border-border py-3 text-sm text-muted-foreground">
+            Nessun evento con questo filtro.
           </p>
         ) : (
-          list.map((e) => (
-            <EventRow
-              key={e.id}
-              to="/admin/eventi/$code"
-              params={{ code: e.code }}
-              date={e.date}
-              name={e.name}
-              place={e.place}
-              time={`${e.timeStart}–${e.timeEnd}`}
-              code={e.code}
-              status={e.status}
-            />
-          ))
+          <ul className="border-t border-border">
+            {filtered.map((e) => (
+              <li key={e.id}>
+                <Link
+                  to="/admin/eventi/$code"
+                  params={{ code: e.code }}
+                  className="flex items-center justify-between gap-3 border-b border-border py-3 active:bg-muted"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm text-foreground">{e.name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {e.place} · {e.timeStart}–{e.timeEnd} · {e.date}
+                    </span>
+                  </span>
+                  <StatusTag status={e.status} />
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
-
-      <div className="mt-8 px-3">
-        <DemoNote />
-      </div>
+      </section>
     </AppShell>
   );
 }
