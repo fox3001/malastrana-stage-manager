@@ -14,6 +14,7 @@ import {
   GEAR,
   LOAD_ROWS,
   NOTIFICATIONS,
+  type Collaborator,
   type Costume,
   type GearItem,
   type LoadRow,
@@ -23,6 +24,26 @@ import {
 export type AvailabilityResponse = "yes" | "no" | "disponibile" | "non_disponibile" | "da_definire";
 export type BollaItemStatus = "presente" | "danneggiato" | "mancante";
 export type EventStatus = "richiesta" | "da_definire" | "confermato" | "annullato" | "chiuso";
+export type SkillVerification = "verificata" | "in_verifica" | "proposta";
+
+export interface CollaboratorSkill {
+  name: string;
+  status: SkillVerification;
+  verifiedAt?: string;
+}
+
+export interface CollaboratorExtended extends Collaborator {
+  phone?: string;
+  email?: string;
+  skillsDetail: CollaboratorSkill[];
+  proposedSkills: string[];
+}
+
+export interface EventTeamMember {
+  collaboratorId: string;
+  role: string;
+  isTeamLeader: boolean;
+}
 
 export interface BollaItem {
   id: string;
@@ -51,6 +72,7 @@ export interface MalEventExtended extends MalEvent {
   tlComments?: string;
   tlClosedAt?: string;
   adminApprovedAt?: string;
+  team?: EventTeamMember[];
 }
 
 export interface TimelineEntry {
@@ -61,6 +83,7 @@ export interface TimelineEntry {
 
 interface DemoState {
   events: MalEventExtended[];
+  collaborators: CollaboratorExtended[];
   costumes: Costume[];
   gear: GearItem[];
   load: LoadRow[];
@@ -81,11 +104,24 @@ interface DemoState {
   updateEvent: (code: string, updates: Partial<MalEventExtended>) => void;
   closeEventByTL: (code: string, comments?: string) => void;
   approveEventClosure: (code: string) => void;
+  addSkillToCollaborator: (collaboratorId: string, skill: string) => void;
+  verifyCollaboratorSkill: (collaboratorId: string, skill: string) => void;
+  proposeSkill: (collaboratorId: string, skill: string) => void;
+  updateCollaborator: (collaboratorId: string, updates: Partial<Pick<CollaboratorExtended, "phone" | "email" | "bio" | "role" | "state">>) => void;
+  setEventTeamMember: (eventCode: string, member: EventTeamMember) => void;
+  removeEventTeamMember: (eventCode: string, collaboratorId: string) => void;
 }
 
-const STORAGE_KEY = "malastrana-demo-v2";
-
+const STORAGE_KEY = "malastrana-demo-v3";
 const DemoContext = createContext<DemoState | null>(null);
+
+const toCollaboratorExtended = (collaborator: Collaborator): CollaboratorExtended => ({
+  ...collaborator,
+  phone: "",
+  email: "",
+  skillsDetail: collaborator.skills.map((name) => ({ name, status: "in_verifica" })),
+  proposedSkills: [],
+});
 
 interface Persisted {
   availability: Record<string, AvailabilityResponse | undefined>;
@@ -95,6 +131,7 @@ interface Persisted {
   bolle: Bolla[];
   bollaItemsState: Record<string, BollaItemStatus | undefined>;
   events: MalEventExtended[];
+  collaborators: CollaboratorExtended[];
 }
 
 const initial: Persisted = {
@@ -104,12 +141,14 @@ const initial: Persisted = {
   timeline: [],
   bolle: [],
   bollaItemsState: {},
+  collaborators: COLLABORATORS.map(toCollaboratorExtended),
   events: EVENTS.map((e) => ({
     ...e,
     contactName: "",
     contactPhone: "",
     adminNotes: "",
     tlComments: "",
+    team: [],
   })),
 };
 
@@ -148,15 +187,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const addCostume = useCallback((costume: Omit<Costume, "id" | "verification" | "owner">) => {
     setState((s) => ({
       ...s,
-      costumes: [
-        {
-          ...costume,
-          id: `cos-${Date.now()}`,
-          verification: "inserito",
-          owner: "Elena Rossi",
-        },
-        ...s.costumes,
-      ],
+      costumes: [{ ...costume, id: `cos-${Date.now()}`, verification: "inserito", owner: "Elena Rossi" }, ...s.costumes],
     }));
   }, []);
 
@@ -164,126 +195,115 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     setState((s) => ({
       ...s,
       load: s.load.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-      timeline: note
-        ? [
-            {
-              id: `tl-${Date.now()}`,
-              text: note,
-              at: new Date().toLocaleTimeString("it-IT", {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            },
-            ...s.timeline,
-          ]
-        : s.timeline,
+      timeline: note ? [{ id: `tl-${Date.now()}`, text: note, at: new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) }, ...s.timeline] : s.timeline,
     }));
   }, []);
 
-  const addBolla = useCallback((bolla: Bolla) => {
-    setState((s) => ({ ...s, bolle: [...s.bolle, bolla] }));
-  }, []);
-
-  const closeBolla = useCallback((bollaCode: string) => {
-    setState((s) => ({
-      ...s,
-      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, closed: true } : b)),
-    }));
-  }, []);
-
-  const reopenBolla = useCallback((bollaCode: string) => {
-    setState((s) => ({
-      ...s,
-      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, closed: false } : b)),
-    }));
-  }, []);
-
-  const setBollaTeamLeader = useCallback((bollaCode: string, collaboratorId: string) => {
-    setState((s) => ({
-      ...s,
-      bolle: s.bolle.map((b) => (b.code === bollaCode ? { ...b, teamLeaderId: collaboratorId } : b)),
-    }));
-  }, []);
-
-  const setBollaItemStatus = useCallback((itemId: string, status: BollaItemStatus) => {
-    setState((s) => ({
-      ...s,
-      bollaItemsState: { ...s.bollaItemsState, [itemId]: status },
-    }));
-  }, []);
+  const addBolla = useCallback((bolla: Bolla) => setState((s) => ({ ...s, bolle: [...s.bolle, bolla] })), []);
+  const closeBolla = useCallback((bollaCode: string) => setState((s) => ({ ...s, bolle: s.bolle.map((b) => b.code === bollaCode ? { ...b, closed: true } : b) })), []);
+  const reopenBolla = useCallback((bollaCode: string) => setState((s) => ({ ...s, bolle: s.bolle.map((b) => b.code === bollaCode ? { ...b, closed: false } : b) })), []);
+  const setBollaTeamLeader = useCallback((bollaCode: string, collaboratorId: string) => setState((s) => ({ ...s, bolle: s.bolle.map((b) => b.code === bollaCode ? { ...b, teamLeaderId: collaboratorId } : b) })), []);
+  const setBollaItemStatus = useCallback((itemId: string, status: BollaItemStatus) => setState((s) => ({ ...s, bollaItemsState: { ...s.bollaItemsState, [itemId]: status } })), []);
 
   const updateEvent = useCallback((code: string, updates: Partial<MalEventExtended>) => {
-    setState((s) => ({
-      ...s,
-      events: s.events.map((e) => (e.code === code ? { ...e, ...updates } : e)),
-    }));
+    setState((s) => ({ ...s, events: s.events.map((e) => e.code === code ? { ...e, ...updates } : e) }));
   }, []);
 
   const closeEventByTL = useCallback((code: string, comments?: string) => {
     setState((s) => ({
       ...s,
-      events: s.events.map((e) =>
-        e.code === code
-          ? {
-              ...e,
-              status: "chiuso" as EventStatus,
-              tlComments: comments || "",
-              tlClosedAt: new Date().toISOString(),
-            }
-          : e,
-      ),
+      events: s.events.map((e) => e.code === code ? { ...e, status: "chiuso" as EventStatus, tlComments: comments || "", tlClosedAt: new Date().toISOString() } : e),
     }));
   }, []);
 
   const approveEventClosure = useCallback((code: string) => {
+    setState((s) => ({ ...s, events: s.events.map((e) => e.code === code ? { ...e, adminApprovedAt: new Date().toISOString() } : e) }));
+  }, []);
+
+  const addSkillToCollaborator = useCallback((collaboratorId: string, skill: string) => {
+    const normalized = skill.trim().startsWith("#") ? skill.trim() : `#${skill.trim().replace(/\s+/g, "")}`;
+    if (!normalized || normalized === "#") return;
     setState((s) => ({
       ...s,
-      events: s.events.map((e) =>
-        e.code === code ? { ...e, adminApprovedAt: new Date().toISOString() } : e,
-      ),
+      collaborators: s.collaborators.map((c) => c.id !== collaboratorId || c.skillsDetail.some((item) => item.name.toLowerCase() === normalized.toLowerCase())
+        ? c
+        : { ...c, skills: [...c.skills, normalized], skillsDetail: [...c.skillsDetail, { name: normalized, status: "in_verifica" }] }),
     }));
   }, []);
 
-  const value = useMemo<DemoState>(
-    () => ({
-      events: state.events,
-      gear: GEAR,
-      costumes: state.costumes,
-      load: state.load,
-      timeline: state.timeline,
-      availability: state.availability,
-      bolle: state.bolle,
-      bollaItemsState: state.bollaItemsState,
-      setAvailability,
-      setAvailabilityResponse: setAvailability,
-      clearAvailabilityResponse,
-      addCostume,
-      updateLoadRow,
-      addBolla,
-      closeBolla,
-      reopenBolla,
-      setBollaTeamLeader,
-      setBollaItemStatus,
-      updateEvent,
-      closeEventByTL,
-      approveEventClosure,
-    }),
-    [
-      state,
-      setAvailability,
-      clearAvailabilityResponse,
-      addCostume,
-      updateLoadRow,
-      addBolla,
-      closeBolla,
-      reopenBolla,
-      setBollaTeamLeader,
-      setBollaItemStatus,
-      updateEvent,
-      closeEventByTL,
-      approveEventClosure,
-    ],
-  );
+  const verifyCollaboratorSkill = useCallback((collaboratorId: string, skill: string) => {
+    setState((s) => ({
+      ...s,
+      collaborators: s.collaborators.map((c) => c.id !== collaboratorId ? c : {
+        ...c,
+        skillsDetail: c.skillsDetail.map((item) => item.name === skill ? { ...item, status: "verificata", verifiedAt: new Date().toISOString() } : item),
+        proposedSkills: c.proposedSkills.filter((item) => item !== skill),
+      }),
+    }));
+  }, []);
+
+  const proposeSkill = useCallback((collaboratorId: string, skill: string) => {
+    const normalized = skill.trim().startsWith("#") ? skill.trim() : `#${skill.trim().replace(/\s+/g, "")}`;
+    if (!normalized || normalized === "#") return;
+    setState((s) => ({
+      ...s,
+      collaborators: s.collaborators.map((c) => c.id !== collaboratorId || c.proposedSkills.includes(normalized)
+        ? c
+        : { ...c, proposedSkills: [...c.proposedSkills, normalized] }),
+    }));
+  }, []);
+
+  const updateCollaborator = useCallback((collaboratorId: string, updates: Partial<Pick<CollaboratorExtended, "phone" | "email" | "bio" | "role" | "state">>) => {
+    setState((s) => ({ ...s, collaborators: s.collaborators.map((c) => c.id === collaboratorId ? { ...c, ...updates } : c) }));
+  }, []);
+
+  const setEventTeamMember = useCallback((eventCode: string, member: EventTeamMember) => {
+    setState((s) => ({
+      ...s,
+      events: s.events.map((event) => {
+        if (event.code !== eventCode) return event;
+        const team = event.team || [];
+        const withoutMember = team.filter((item) => item.collaboratorId !== member.collaboratorId);
+        const withoutOtherTl = member.isTeamLeader ? withoutMember.map((item) => ({ ...item, isTeamLeader: false })) : withoutMember;
+        return { ...event, team: [...withoutOtherTl, member] };
+      }),
+    }));
+  }, []);
+
+  const removeEventTeamMember = useCallback((eventCode: string, collaboratorId: string) => {
+    setState((s) => ({ ...s, events: s.events.map((event) => event.code === eventCode ? { ...event, team: (event.team || []).filter((item) => item.collaboratorId !== collaboratorId) } : event) }));
+  }, []);
+
+  const value = useMemo<DemoState>(() => ({
+    events: state.events,
+    collaborators: state.collaborators,
+    gear: GEAR,
+    costumes: state.costumes,
+    load: state.load,
+    timeline: state.timeline,
+    availability: state.availability,
+    bolle: state.bolle,
+    bollaItemsState: state.bollaItemsState,
+    setAvailability,
+    setAvailabilityResponse: setAvailability,
+    clearAvailabilityResponse,
+    addCostume,
+    updateLoadRow,
+    addBolla,
+    closeBolla,
+    reopenBolla,
+    setBollaTeamLeader,
+    setBollaItemStatus,
+    updateEvent,
+    closeEventByTL,
+    approveEventClosure,
+    addSkillToCollaborator,
+    verifyCollaboratorSkill,
+    proposeSkill,
+    updateCollaborator,
+    setEventTeamMember,
+    removeEventTeamMember,
+  }), [state, setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow, addBolla, closeBolla, reopenBolla, setBollaTeamLeader, setBollaItemStatus, updateEvent, closeEventByTL, approveEventClosure, addSkillToCollaborator, verifyCollaboratorSkill, proposeSkill, updateCollaborator, setEventTeamMember, removeEventTeamMember]);
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
 }
