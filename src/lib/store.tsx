@@ -3,6 +3,7 @@ import { EVENTS, COLLABORATORS, COSTUMES, GEAR, NOTIFICATIONS } from "@/data/dem
 
 export type AvailabilityResponse = "yes" | "no";
 export type BollaItemStatus = "presente" | "danneggiato" | "mancante";
+export type EventStatus = "richiesta" | "da_definire" | "confermato" | "annullato" | "chiuso";
 
 export type DemoEvent = typeof EVENTS[number];
 
@@ -26,8 +27,25 @@ export interface Bolla {
   teamLeaderId?: string;
 }
 
+export interface DemoEventExtended {
+  id: string;
+  code: string;
+  name: string;
+  date: string;
+  timeStart: string;
+  timeEnd: string;
+  place: string;
+  status: EventStatus;
+  contactName?: string;
+  contactPhone?: string;
+  adminNotes?: string;
+  tlComments?: string;
+  tlClosedAt?: string;
+  adminApprovedAt?: string;
+}
+
 export interface DemoState {
-  events: DemoEvent[];
+  events: DemoEventExtended[];
   availability: Record<string, AvailabilityResponse | undefined>;
   costumes: typeof COSTUMES;
   gear: typeof GEAR;
@@ -40,10 +58,13 @@ export interface DemoState {
   closeBolla: (bollaCode: string) => void;
   reopenBolla: (bollaCode: string) => void;
   setBollaTeamLeader: (bollaCode: string, collaboratorId: string) => void;
+  updateEvent: (code: string, updates: Partial<DemoEventExtended>) => void;
+  closeEventByTL: (code: string, comments?: string) => void;
+  approveEventClosure: (code: string) => void;
 }
 
 export const useDemo = create<DemoState>((set) => ({
-  events: EVENTS,
+  events: EVENTS.map((e) => ({ ...e, contactName: "", contactPhone: "", adminNotes: "", tlComments: "" })),
   availability: {},
   costumes: COSTUMES,
   gear: GEAR,
@@ -96,6 +117,31 @@ export const useDemo = create<DemoState>((set) => ({
     set((state) => ({
       bolle: state.bolle.map((b) =>
         b.code === bollaCode ? { ...b, teamLeaderId: collaboratorId } : b,
+      ),
+    })),
+
+  updateEvent: (code, updates) =>
+    set((state) => ({
+      events: state.events.map((e) =>
+        e.code === code ? { ...e, ...updates } : e,
+      ),
+    })),
+
+  closeEventByTL: (code, comments) =>
+    set((state) => ({
+      events: state.events.map((e) =>
+        e.code === code
+          ? { ...e, status: "chiuso", tlComments: comments || "", tlClosedAt: new Date().toISOString() }
+          : e,
+      ),
+    })),
+
+  approveEventClosure: (code) =>
+    set((state) => ({
+      events: state.events.map((e) =>
+        e.code === code
+          ? { ...e, adminApprovedAt: new Date().toISOString() }
+          : e,
       ),
     })),
 }));
