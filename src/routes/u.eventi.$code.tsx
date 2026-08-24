@@ -1,201 +1,129 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import {
-  Button,
-  DemoNote,
-  Field,
-  LinkButton,
-  SectionTitle,
-  StatusTag,
-} from "@/components/ui-kit";
+import { SectionTitle, StatusTag } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
-import { formatDate, type Availability } from "@/data/demo";
-import { cn } from "@/lib/utils";
+import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, ShieldCheck, UserRound, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/u/eventi/$code")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Scheda evento ${params.code} — Malastrana` },
-      {
-        name: "description",
-        content:
-          "Scheda evento dimostrativa con stato, orari, informazioni operative e azioni locali.",
-      },
-      { property: "og:title", content: `Scheda evento ${params.code} — Malastrana` },
-      {
-        property: "og:description",
-        content: "Scheda evento del prototipo Malastrana.",
-      },
-      { property: "og:url", content: `/u/eventi/${params.code}` },
-    ],
-    links: [{ rel: "canonical", href: `/u/eventi/${params.code}` }],
-  }),
-  component: SchedaEvento,
+  component: EventoUtenteDettaglio,
 });
 
-const CHOICES: Array<{ key: Exclude<Availability, null>; label: string }> = [
-  { key: "disponibile", label: "Disponibile" },
-  { key: "non_disponibile", label: "Non disponibile" },
-  { key: "da_definire", label: "Da definire" },
-];
-
-function SchedaEvento() {
+function EventoUtenteDettaglio() {
   const { code } = Route.useParams();
-  const { events, availability, setAvailability, costumes } = useDemo();
-  const event = events.find((e) => e.code === code);
-  if (!event) throw notFound();
+  const { events, collaborators, availability, setAvailabilityResponse } = useDemo();
+  const event = events.find((item) => item.code === code);
+  const currentUser = collaborators.find((c) => c.id === "col-elena") || collaborators[0];
 
-  const answer = availability[event.id] ?? null;
-  const cancelled = event.status === "annullato";
-  const costume = event.assignment
-    ? costumes.find((c) => c.id === event.assignment?.costumeId)
-    : undefined;
+  if (!event || !currentUser) {
+    return (
+      <AppShell area="u" title="Evento" back="/u/eventi">
+        <section className="px-3 pt-6"><p className="text-sm text-muted-foreground">Evento non trovato.</p></section>
+      </AppShell>
+    );
+  }
+
+  const teamMember = event.team?.find((member) => member.collaboratorId === currentUser.id);
+  const isTeamLeader = Boolean(teamMember?.isTeamLeader);
+  const response = availability[event.id];
+  const canRespond = event.status === "richiesta" || event.status === "da_definire";
 
   return (
-    <AppShell area="user" title="Scheda evento" back="/u/eventi">
-      <div className="relative">
-        {cancelled && (
-          <div
-            className="pointer-events-none absolute inset-x-0 top-24 z-10 flex justify-center overflow-hidden"
-            aria-hidden="true"
-          >
-            <span className="-rotate-12 whitespace-nowrap border-y-2 border-destructive/50 px-4 py-2 font-serif text-3xl tracking-[0.12em] text-destructive/30 sm:text-4xl">
-              EVENTO ANNULLATO
-            </span>
-          </div>
-        )}
-
-        <header className="border-b border-border bg-surface px-4 py-6">
-          <p className="font-serif text-2xl text-primary">{formatDate(event.date)}</p>
-          <h2 className="mt-1 font-serif text-2xl leading-tight text-foreground">
-            {event.name}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {event.place} · {event.timeStart}–{event.timeEnd}
-          </p>
-          <p className="mt-1 font-sans text-[11px] tracking-wider text-muted-foreground/80">
-            {event.code}
-          </p>
-          <div className="mt-3">
-            <StatusTag status={event.status} />
-          </div>
-        </header>
-
-        {cancelled && (
-          <div className="mx-3 mt-4 border-l-2 border-destructive bg-surface px-4 py-3">
-            <p className="eyebrow text-destructive">Motivo dell’annullamento</p>
-            <p className="mt-1 text-sm text-foreground">{event.cancelReason}</p>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Tutte le azioni operative sono disabilitate.
-            </p>
-          </div>
-        )}
-
-        <section className="mt-6 px-3">
-          <SectionTitle>Informazioni</SectionTitle>
+    <AppShell area="u" title="Evento" back="/u/eventi">
+      <section className="px-3 pt-6">
+        <p className="eyebrow text-accent">Evento</p>
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <Field label="Tematica">{event.theme}</Field>
-            <Field label="Tipo evento">{event.type}</Field>
-            <Field label="Luogo">{event.place}</Field>
-            <Field label="Orari">
-              {event.timeStart}–{event.timeEnd}
-            </Field>
-            <Field label="Durata">{event.duration}</Field>
-            <Field label="Info pubbliche">{event.publicInfo}</Field>
+            <h2 className="mt-1 font-serif text-3xl text-primary">{event.name}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{event.type}</p>
+          </div>
+          <StatusTag status={event.status} />
+        </div>
+        {isTeamLeader && (
+          <div className="mt-3 inline-flex items-center gap-2 border border-accent bg-accent/10 px-3 py-2 text-sm font-semibold text-accent">
+            <ShieldCheck className="h-4 w-4" /> Team Leader
+          </div>
+        )}
+      </section>
+
+      <section className="mt-6 px-3">
+        <div className="grid grid-cols-2 gap-2">
+          <Info icon={CalendarDays} label="Data" value={event.date} />
+          <Info icon={Clock} label="Orario" value={`${event.timeStart}–${event.timeEnd}`} />
+          <Info icon={MapPin} label="Luogo" value={event.place} />
+          <Info icon={UserRound} label="Stato" value={<StatusTag status={event.status} />} />
+        </div>
+      </section>
+
+      {canRespond && (
+        <section className="mt-6 px-3">
+          <SectionTitle>La tua disponibilità</SectionTitle>
+          <div className="border border-border bg-surface p-4">
+            {response ? (
+              <p className="flex items-center gap-2 text-sm text-foreground">
+                {response === "disponibile" || response === "yes" ? <CheckCircle2 className="h-5 w-5 text-accent" /> : <XCircle className="h-5 w-5 text-muted-foreground" />}
+                Risposta registrata: <strong>{response.replace("_", " ")}</strong>
+              </p>
+            ) : (
+              <div>
+                <p className="text-sm text-foreground">Puoi partecipare a questo evento?</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button onClick={() => setAvailabilityResponse(event.id, "disponibile")} className="inline-flex min-h-9 items-center gap-2 border border-primary bg-primary px-3 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+                    <CheckCircle2 className="h-4 w-4" /> Disponibile
+                  </button>
+                  <button onClick={() => setAvailabilityResponse(event.id, "non_disponibile")} className="inline-flex min-h-9 items-center gap-2 border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground">
+                    <XCircle className="h-4 w-4" /> Non disponibile
+                  </button>
+                  <button onClick={() => setAvailabilityResponse(event.id, "da_definire")} className="inline-flex min-h-9 items-center border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground">
+                    Da definire
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
+      )}
 
-        {event.status === "richiesta" && (
-          <section className="mt-8 px-3">
-            <SectionTitle>La tua disponibilità</SectionTitle>
-            <div className="space-y-2">
-              {CHOICES.map((c) => (
-                <Button
-                  key={c.key}
-                  full
-                  variant={answer === c.key ? "primary" : "outline"}
-                  onClick={() => {
-                    setAvailability(event.id, c.key);
-                    toast.success(`Stato locale aggiornato: ${c.label.toLowerCase()}`, {
-                      description: "Salvato solo su questo dispositivo (prototipo).",
-                    });
-                  }}
-                >
-                  {c.label}
-                </Button>
-              ))}
-            </div>
-            <p
-              className={cn(
-                "mt-3 border-l-2 px-3 py-2 text-sm",
-                answer ? "border-accent text-foreground" : "border-border text-muted-foreground",
-              )}
-            >
-              {answer
-                ? `Risposta registrata localmente: ${
-                    CHOICES.find((c) => c.key === answer)?.label
-                  }.`
-                : "Nessuna risposta registrata su questo dispositivo."}
-            </p>
-          </section>
-        )}
+      {teamMember && (
+        <section className="mt-6 px-3">
+          <SectionTitle>La tua convocazione</SectionTitle>
+          <div className="border border-border bg-surface p-4">
+            <p className="eyebrow text-muted-foreground">Ruolo</p>
+            <p className="mt-1 text-sm text-foreground">{teamMember.role}</p>
+            {event.assignment?.callTime && <><p className="eyebrow mt-4 text-muted-foreground">Convocazione</p><p className="mt-1 text-sm text-foreground">{event.assignment.callTime}</p></>}
+            {event.assignment?.dressCode && <><p className="eyebrow mt-4 text-muted-foreground">Abbigliamento</p><p className="mt-1 text-sm text-foreground">{event.assignment.dressCode}</p></>}
+            {event.assignment?.instructions && <><p className="eyebrow mt-4 text-muted-foreground">Istruzioni</p><p className="mt-1 text-sm text-foreground">{event.assignment.instructions}</p></>}
+          </div>
+        </section>
+      )}
 
-        {event.status === "confermato" && event.assignment && (
-          <section className="mt-8 px-3">
-            <SectionTitle>Dettagli operativi</SectionTitle>
-            <div>
-              <Field label="Ruolo">{event.assignment.role}</Field>
-              <Field label="Chiamata">{event.assignment.callTime}</Field>
-              <Field label="Referente">{event.assignment.referent}</Field>
-              <Field label="Istruzioni">{event.assignment.instructions}</Field>
-              <Field label="Dress code">{event.assignment.dressCode}</Field>
-              <Field label="Costume">
-                {costume ? `${costume.name} — ${costume.category}` : "Da assegnare"}
-              </Field>
-              <Field label="Compenso">{event.assignment.fee}</Field>
-            </div>
-            <div className="mt-4">
-              <LinkButton
-                to="/u/bolla/$code"
-                params={{ code: event.code }}
-                variant="accent"
-                full
-              >
-                Apri bolla di carico
-              </LinkButton>
-            </div>
-          </section>
-        )}
+      {event.contactName && (
+        <section className="mt-6 px-3">
+          <SectionTitle>Contatto in location</SectionTitle>
+          <div className="border border-border bg-surface p-4">
+            <p className="text-sm text-foreground">{event.contactName}</p>
+            {event.contactPhone && <a href={`tel:${event.contactPhone}`} className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-accent"><Phone className="h-4 w-4" /> {event.contactPhone}</a>}
+          </div>
+        </section>
+      )}
 
-        {event.status === "da_definire" && (
-          <section className="mt-8 px-3">
-            <SectionTitle>Stato</SectionTitle>
-            <p className="text-sm text-muted-foreground">
-              L’evento è in via di definizione: struttura, ruoli e orari possono
-              cambiare. Nessuna azione richiesta al momento.
-            </p>
-          </section>
-        )}
-
-        {cancelled && (
-          <section className="mt-8 px-3">
-            <SectionTitle>Azioni</SectionTitle>
-            <div className="space-y-2">
-              <Button full variant="outline" disabled>
-                Disponibilità non modificabile
-              </Button>
-              <Button full variant="outline" disabled>
-                Bolla non disponibile
-              </Button>
-            </div>
-          </section>
-        )}
-
-        <div className="mt-8 px-3">
-          <DemoNote />
+      <section className="mt-6 px-3">
+        <SectionTitle>Informazioni evento</SectionTitle>
+        <div className="border border-border bg-surface p-4">
+          <p className="text-sm text-foreground">{event.publicInfo}</p>
         </div>
-      </div>
+      </section>
+
+      {isTeamLeader && (
+        <section className="mt-6 px-3">
+          <Link to="/u/bolla/$code" params={{ code: event.code }} className="inline-flex min-h-10 items-center border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+            Apri controllo bolla
+          </Link>
+        </section>
+      )}
     </AppShell>
   );
+}
+
+function Info({ icon: Icon, label, value }: { icon: typeof CalendarDays; label: string; value: React.ReactNode }) {
+  return <div className="border border-border bg-surface p-3"><Icon className="h-4 w-4 text-primary" strokeWidth={1.5} /><p className="eyebrow mt-2 text-xs text-muted-foreground">{label}</p><div className="mt-1 text-sm text-foreground">{value}</div></div>;
 }
