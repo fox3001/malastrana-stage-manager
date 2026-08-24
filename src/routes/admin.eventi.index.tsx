@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { EventRow, SectionTitle, StatusTag } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
-import { CalendarDays, Filter } from "lucide-react";
+import { CalendarDays, Filter, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/admin/eventi/")({
@@ -31,7 +31,7 @@ function EventiLista() {
         </p>
       </section>
 
-      <section className="mt-6 px-3">
+      <section className="mt-6 flex items-center justify-between px-3">
         <div className="flex items-center gap-2 overflow-x-auto">
           <button
             onClick={() => setFilter("tutti")}
@@ -57,6 +57,13 @@ function EventiLista() {
             </button>
           ))}
         </div>
+        <Link
+          to="/admin/eventi/nuovo"
+          className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+        >
+          <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+          Nuovo
+        </Link>
       </section>
 
       <section className="mt-6 px-3">
