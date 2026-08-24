@@ -6,6 +6,7 @@ import { Route as rootRoute } from './routes/__root'
 
 import { Route as IndexRoute } from './routes/index'
 import { Route as AdminIndexRoute } from './routes/admin.index'
+import { Route as AdminNotificheRoute } from './routes/admin.notifiche'
 import { Route as AdminEventiIndexRoute } from './routes/admin.eventi.index'
 import { Route as AdminEventiCodeRoute } from './routes/admin.eventi.$code'
 import { Route as AdminEventiNuovoRoute } from './routes/admin.eventi.nuovo'
@@ -66,6 +67,21 @@ const adminIndexRoute = CreateFileRoute('/admin/')({
     children: [],
     id: '/admin/',
     path: '/admin',
+    validateSearch: undefined,
+    parseParams: undefined,
+    stringifyParams: undefined,
+    validateParams: undefined,
+  },
+  parentRoute: rootRoute,
+})
+
+const adminNotificheRoute = CreateFileRoute('/admin/notifiche')({
+  component: AdminNotificheRoute.default,
+  route: {
+    __types: {},
+    children: [],
+    id: '/admin/notifiche',
+    path: '/admin/notifiche',
     validateSearch: undefined,
     parseParams: undefined,
     stringifyParams: undefined,
@@ -362,6 +378,7 @@ const uBollaCodeRoute = CreateFileRoute('/u/bolla/$code')({
 rootRoute.addChildren([
   indexRoute,
   adminIndexRoute,
+  adminNotificheRoute,
   adminEventiIndexRoute,
   adminEventiCodeRoute,
   adminEventiNuovoRoute,
