@@ -25,6 +25,7 @@ export type AvailabilityResponse = "yes" | "no" | "disponibile" | "non_disponibi
 export type BollaItemStatus = "presente" | "danneggiato" | "mancante";
 export type EventStatus = "richiesta" | "da_definire" | "confermato" | "annullato" | "chiuso";
 export type SkillVerification = "verificata" | "in_verifica" | "proposta";
+export type ProposalStatus = "proposto" | "confermato" | "non_preso";
 
 export interface CollaboratorSkill {
   name: string;
@@ -43,6 +44,7 @@ export interface EventTeamMember {
   collaboratorId: string;
   role: string;
   isTeamLeader: boolean;
+  proposalStatus: ProposalStatus;
 }
 
 export interface BollaItem {
@@ -110,9 +112,11 @@ interface DemoState {
   updateCollaborator: (collaboratorId: string, updates: Partial<Pick<CollaboratorExtended, "phone" | "email" | "bio" | "role" | "state">>) => void;
   setEventTeamMember: (eventCode: string, member: EventTeamMember) => void;
   removeEventTeamMember: (eventCode: string, collaboratorId: string) => void;
+  setProposalStatus: (eventCode: string, collaboratorId: string, status: ProposalStatus) => void;
+  setTeamLeaderForEvent: (eventCode: string, collaboratorId: string, isTL: boolean) => void;
 }
 
-const STORAGE_KEY = "malastrana-demo-v4";
+const STORAGE_KEY = "malastrana-demo-v5";
 const DemoContext = createContext<DemoState | null>(null);
 
 const toCollaboratorExtended = (collaborator: Collaborator): CollaboratorExtended => ({
@@ -125,21 +129,21 @@ const toCollaboratorExtended = (collaborator: Collaborator): CollaboratorExtende
 
 const EVENT_TEAMS: Record<string, EventTeamMember[]> = {
   "MAL-261031-03": [
-    { collaboratorId: "col-elena", role: "Performer horror / accoglienza pubblico", isTeamLeader: true },
-    { collaboratorId: "col-marco", role: "Attore percorso / combattimento scenico", isTeamLeader: false },
-    { collaboratorId: "col-giulia", role: "Performer horror / trucco scenico", isTeamLeader: false },
-    { collaboratorId: "col-davide", role: "Tecnico luci e allestimenti", isTeamLeader: false },
+    { collaboratorId: "col-elena", role: "Performer horror / accoglienza pubblico", isTeamLeader: true, proposalStatus: "confermato" },
+    { collaboratorId: "col-marco", role: "Attore percorso / combattimento scenico", isTeamLeader: false, proposalStatus: "confermato" },
+    { collaboratorId: "col-giulia", role: "Performer horror / trucco scenico", isTeamLeader: false, proposalStatus: "confermato" },
+    { collaboratorId: "col-davide", role: "Tecnico luci e allestimenti", isTeamLeader: false, proposalStatus: "confermato" },
   ],
   "MAL-261115-01": [
-    { collaboratorId: "col-elena", role: "Dama di corte / sospettata", isTeamLeader: false },
-    { collaboratorId: "col-marco", role: "Capitano della guardia / sospettato", isTeamLeader: true },
-    { collaboratorId: "col-giulia", role: "Cameriera / personaggio di supporto", isTeamLeader: false },
-    { collaboratorId: "col-davide", role: "Tecnico di scena e luci", isTeamLeader: false },
+    { collaboratorId: "col-elena", role: "Dama di corte / sospettata", isTeamLeader: false, proposalStatus: "confermato" },
+    { collaboratorId: "col-marco", role: "Capitano della guardia / sospettato", isTeamLeader: true, proposalStatus: "confermato" },
+    { collaboratorId: "col-giulia", role: "Cameriera / personaggio di supporto", isTeamLeader: false, proposalStatus: "confermato" },
+    { collaboratorId: "col-davide", role: "Tecnico di scena e luci", isTeamLeader: false, proposalStatus: "confermato" },
   ],
   "MAL-261122-02": [
-    { collaboratorId: "col-elena", role: "Investigatrice / conduzione tavoli", isTeamLeader: true },
-    { collaboratorId: "col-marco", role: "Sospettato / interazione pubblico", isTeamLeader: false },
-    { collaboratorId: "col-giulia", role: "Performer / accoglienza ospiti", isTeamLeader: false },
+    { collaboratorId: "col-elena", role: "Investigatrice / conduzione tavoli", isTeamLeader: true, proposalStatus: "confermato" },
+    { collaboratorId: "col-marco", role: "Sospettato / interazione pubblico", isTeamLeader: false, proposalStatus: "confermato" },
+    { collaboratorId: "col-giulia", role: "Performer / accoglienza ospiti", isTeamLeader: false, proposalStatus: "confermato" },
   ],
 };
 
@@ -221,11 +225,15 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const updateCollaborator = useCallback((collaboratorId: string, updates: Partial<Pick<CollaboratorExtended, "phone" | "email" | "bio" | "role" | "state">>) => setState((s) => ({ ...s, collaborators: s.collaborators.map((c) => c.id === collaboratorId ? { ...c, ...updates } : c) })), []);
 
-  const setEventTeamMember = useCallback((eventCode: string, member: EventTeamMember) => setState((s) => ({ ...s, events: s.events.map((event) => { if (event.code !== eventCode) return event; const team = event.team || []; const withoutMember = team.filter((item) => item.collaboratorId !== member.collaboratorId); const withoutOtherTl = member.isTeamLeader ? withoutMember.map((item) => ({ ...item, isTeamLeader: false })) : withoutMember; return { ...event, team: [...withoutOtherTl, member] }; }) })), []);
+  const setEventTeamMember = useCallback((eventCode: string, member: EventTeamMember) => setState((s) => ({ ...s, events: s.events.map((event) => { if (event.code !== eventCode) return event; const team = event.team || []; const withoutMember = team.filter((item) => item.collaboratorId !== member.collaboratorId); return { ...event, team: [...withoutMember, member] }; }) })), []);
 
   const removeEventTeamMember = useCallback((eventCode: string, collaboratorId: string) => setState((s) => ({ ...s, events: s.events.map((event) => event.code === eventCode ? { ...event, team: (event.team || []).filter((item) => item.collaboratorId !== collaboratorId) } : event) })), []);
 
-  const value = useMemo<DemoState>(() => ({ events: state.events, collaborators: state.collaborators, gear: GEAR, costumes: state.costumes, load: state.load, timeline: state.timeline, availability: state.availability, bolle: state.bolle, bollaItemsState: state.bollaItemsState, setAvailability, setAvailabilityResponse: setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow, addBolla, closeBolla, reopenBolla, setBollaTeamLeader, setBollaItemStatus, updateEvent, closeEventByTL, approveEventClosure, addSkillToCollaborator, verifyCollaboratorSkill, proposeSkill, updateCollaborator, setEventTeamMember, removeEventTeamMember }), [state, setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow, addBolla, closeBolla, reopenBolla, setBollaTeamLeader, setBollaItemStatus, updateEvent, closeEventByTL, approveEventClosure, addSkillToCollaborator, verifyCollaboratorSkill, proposeSkill, updateCollaborator, setEventTeamMember, removeEventTeamMember]);
+  const setProposalStatus = useCallback((eventCode: string, collaboratorId: string, status: ProposalStatus) => setState((s) => ({ ...s, events: s.events.map((event) => { if (event.code !== eventCode) return event; const team = event.team || []; const member = team.find((m) => m.collaboratorId === collaboratorId); if (!member) return event; return { ...event, team: team.map((m) => m.collaboratorId === collaboratorId ? { ...m, proposalStatus: status } : m) }; }) })), []);
+
+  const setTeamLeaderForEvent = useCallback((eventCode: string, collaboratorId: string, isTL: boolean) => setState((s) => ({ ...s, events: s.events.map((event) => { if (event.code !== eventCode) return event; const team = event.team || []; if (!team.some((m) => m.collaboratorId === collaboratorId)) return event; return { ...event, team: team.map((m) => m.collaboratorId === collaboratorId ? { ...m, isTeamLeader: isTL } : m) }; }) })), []);
+
+  const value = useMemo<DemoState>(() => ({ events: state.events, collaborators: state.collaborators, gear: GEAR, costumes: state.costumes, load: state.load, timeline: state.timeline, availability: state.availability, bolle: state.bolle, bollaItemsState: state.bollaItemsState, setAvailability, setAvailabilityResponse: setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow, addBolla, closeBolla, reopenBolla, setBollaTeamLeader, setBollaItemStatus, updateEvent, closeEventByTL, approveEventClosure, addSkillToCollaborator, verifyCollaboratorSkill, proposeSkill, updateCollaborator, setEventTeamMember, removeEventTeamMember, setProposalStatus, setTeamLeaderForEvent }), [state, setAvailability, clearAvailabilityResponse, addCostume, updateLoadRow, addBolla, closeBolla, reopenBolla, setBollaTeamLeader, setBollaItemStatus, updateEvent, closeEventByTL, approveEventClosure, addSkillToCollaborator, verifyCollaboratorSkill, proposeSkill, updateCollaborator, setEventTeamMember, removeEventTeamMember, setProposalStatus, setTeamLeaderForEvent]);
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
 }

@@ -22,10 +22,13 @@ function EventoUtenteDettaglio() {
     );
   }
 
-  const teamMember = event.team?.find((member) => member.collaboratorId === currentUser.id);
+  const team = event.team || [];
+  const teamMember = team.find((member) => member.collaboratorId === currentUser.id);
   const isTeamLeader = Boolean(teamMember?.isTeamLeader);
   const response = availability[event.id];
   const canRespond = event.status === "richiesta" || event.status === "da_definire";
+
+  const confermati = team.filter((m) => m.proposalStatus === "confermato");
 
   return (
     <AppShell area="u" title="Evento" back="/u/eventi">
@@ -93,6 +96,29 @@ function EventoUtenteDettaglio() {
             {event.assignment?.dressCode && <><p className="eyebrow mt-4 text-muted-foreground">Abbigliamento</p><p className="mt-1 text-sm text-foreground">{event.assignment.dressCode}</p></>}
             {event.assignment?.instructions && <><p className="eyebrow mt-4 text-muted-foreground">Istruzioni</p><p className="mt-1 text-sm text-foreground">{event.assignment.instructions}</p></>}
           </div>
+        </section>
+      )}
+
+      {confermati.length > 0 && (
+        <section className="mt-6 px-3">
+          <SectionTitle>Team confermato</SectionTitle>
+          <ul className="border-t border-border">
+            {confermati.map((member) => {
+              const collab = collaborators.find((c) => c.id === member.collaboratorId);
+              if (!collab) return null;
+              return (
+                <li key={member.collaboratorId} className="flex items-center justify-between gap-3 border-b border-border py-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm text-foreground">{collab.name}</p>
+                      {member.isTeamLeader && <ShieldCheck className="h-4 w-4 shrink-0 text-accent" aria-label="Team Leader" />}
+                    </div>
+                    <p className="truncate text-xs text-muted-foreground">{member.role}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
 
