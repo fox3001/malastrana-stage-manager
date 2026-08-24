@@ -75,6 +75,13 @@ export function AppShell({
           </h1>
           <div className="flex items-center justify-end gap-1">
             <Link
+              to="/"
+              aria-label="Torna alla schermata iniziale"
+              className="flex h-11 w-11 items-center justify-center text-accent"
+            >
+              <Home className="h-5 w-5" strokeWidth={1.5} />
+            </Link>
+            <Link
               {...({
                 to: area === "user" ? "/u/notifiche" : "/admin/modulo/$slug",
                 params: area === "user" ? undefined : { slug: "notifiche" },
