@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { SectionTitle, StatusTag } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
 import { COLLABORATORS } from "@/data/demo";
-import { CalendarDays, Clock, MapPin, Users, Upload, ClipboardList } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Users, Upload, ClipboardList, Phone, FileText, MessageSquare, CheckCircle2, Lock } from "lucide-react";
 import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/admin/eventi/$code")({
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/eventi/$code")({
 
 function EventoDettaglio() {
   const { code } = Route.useParams();
-  const { events, bolle, addBolla } = useDemo();
+  const { events, bolle, addBolla, updateEvent, closeEventByTL, approveEventClosure } = useDemo();
   const event = events.find((e) => e.code === code);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -32,6 +32,8 @@ function EventoDettaglio() {
 
   const team = COLLABORATORS.slice(0, 3);
   const eventBolle = bolle.filter((b) => b.eventCode === event.code);
+  const isTL = true; // demo: assumiamo TL
+  const isAdmin = true; // demo: assumiamo admin
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,6 +66,28 @@ function EventoDettaglio() {
           <InfoCard icon={Clock} label="Orari" value={`${event.timeStart}–${event.timeEnd}`} />
           <InfoCard icon={MapPin} label="Luogo" value={event.place} />
           <InfoCard icon={Users} label="Stato" value={<StatusTag status={event.status} />} />
+        </div>
+      </section>
+
+      <section className="mt-6 px-3">
+        <SectionTitle>Contatto in location</SectionTitle>
+        <div className="grid gap-3 border-t border-border pt-3">
+          <Field icon={Phone} label="Nome contatto">
+            <input
+              value={event.contactName || ""}
+              onChange={(e) => updateEvent(event.code, { contactName: e.target.value })}
+              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Lascia vuoto se non necessario"
+            />
+          </Field>
+          <Field icon={Phone} label="Telefono">
+            <input
+              value={event.contactPhone || ""}
+              onChange={(e) => updateEvent(event.code, { contactPhone: e.target.value })}
+              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Es. +39 333 1234567"
+            />
+          </Field>
         </div>
       </section>
 
@@ -145,18 +169,65 @@ function EventoDettaglio() {
       </section>
 
       <section className="mt-6 px-3">
-        <SectionTitle>Materiale previsto</SectionTitle>
-        <div className="border border-border bg-surface p-4">
-          <p className="text-sm text-foreground">
-            Assegnazione costumi e materiali in arrivo (collegata a bolle di carico).
-          </p>
-          <Link
-            to="/admin/costumi"
-            className="mt-3 inline-flex min-h-9 items-center border border-border bg-surface px-3 text-xs font-semibold uppercase tracking-[0.08em] text-foreground"
-          >
-            Vai a Costumi
-          </Link>
+        <SectionTitle>Note (admin)</SectionTitle>
+        <div className="border-t border-border pt-3">
+          <textarea
+            value={event.adminNotes || ""}
+            onChange={(e) => updateEvent(event.code, { adminNotes: e.target.value })}
+            className="min-h-[120px] w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Note interne dell'ufficio per questo evento..."
+          />
         </div>
+      </section>
+
+      <section className="mt-6 px-3">
+        <SectionTitle>Commenti di fine evento (TL)</SectionTitle>
+        <div className="border-t border-border pt-3">
+          <textarea
+            value={event.tlComments || ""}
+            onChange={(e) => updateEvent(event.code, { tlComments: e.target.value })}
+            disabled={!isTL || event.status === "chiuso"}
+            className="min-h-[120px] w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            placeholder="Il team leader può lasciare commenti qui prima di chiudere l'evento..."
+          />
+        </div>
+      </section>
+
+      <section className="mt-6 px-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {event.status !== "chiuso" ? (
+            <button
+              onClick={() => {
+                const comments = prompt("Inserisci commenti di fine evento (opzionali):");
+                if (comments !== null) closeEventByTL(event.code, comments || undefined);
+              }}
+              disabled={!isTL}
+              className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white disabled:opacity-50"
+            >
+              <Lock className="h-3.5 w-3.5" strokeWidth={2} />
+              Chiudi evento (TL)
+            </button>
+          ) : (
+            <button
+              onClick={() => approveEventClosure(event.code)}
+              disabled={!isAdmin || !!event.adminApprovedAt}
+              className="inline-flex items-center gap-2 rounded-full border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white disabled:opacity-50"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
+              {event.adminApprovedAt ? "Approvato" : "Approva chiusura (admin)"}
+            </button>
+          )}
+        </div>
+        {event.tlClosedAt && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Chiuso dal TL: {new Date(event.tlClosedAt).toLocaleString("it-IT")}
+          </p>
+        )}
+        {event.adminApprovedAt && (
+          <p className="mt-1 text-xs text-accent">
+            Approvato da admin: {new Date(event.adminApprovedAt).toLocaleString("it-IT")}
+          </p>
+        )}
       </section>
 
       {fileName && (
@@ -189,6 +260,26 @@ function InfoCard({
       <Icon className="h-4 w-4 text-primary" strokeWidth={1.5} />
       <p className="mt-2 eyebrow text-xs text-muted-foreground">{label}</p>
       <div className="mt-1 text-sm text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function Field({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: any;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-primary" strokeWidth={1.5} />
+        <p className="eyebrow text-xs text-muted-foreground">{label}</p>
+      </div>
+      <div className="mt-1">{children}</div>
     </div>
   );
 }
