@@ -1,192 +1,69 @@
-import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { Bell, ChevronLeft, Home, Menu, Shirt, X } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { Bell, Home, LogOut, Menu, X } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
-export type AppShellArea = "u" | "admin";
-
-export function AppShell({
-  area,
-  children,
-  title,
-  notifications,
-  back,
-}: {
-  area: AppShellArea;
+export interface AppShellProps {
+  area: "admin" | "u";
+  title: string;
   children: ReactNode;
-  title?: string;
-  notifications?: number;
   back?: string;
-}) {
-  const [menuOpen, setMenuOpen] = useState(false);
+}
+
+export function AppShell({ area, title, children, back }: AppShellProps) {
+  const [open, setOpen] = useState(false);
   const location = useLocation();
-  const router = useRouter();
-
-  const isHome = location.pathname === "/u" || location.pathname === "/admin";
-  const showBack = !isHome;
-
-  const handleBack = () => {
-    if (back) {
-      router.navigate({ to: back as any });
-      return;
-    }
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      router.navigate({ to: area === "admin" ? "/admin" : "/u" });
-    }
-  };
+  const isHome = location.pathname === "/";
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b border-border-strong bg-surface/95 backdrop-blur">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-3 py-3">
-          <div className="flex items-center gap-2">
-            {showBack && (
-              <button
-                onClick={handleBack}
-                className="hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-foreground active:bg-muted sm:flex"
-                aria-label="Indietro"
-              >
-                <ChevronLeft className="h-5 w-5" strokeWidth={1.8} />
-              </button>
-            )}
-            <div>
-              <p className="font-serif text-lg leading-none text-primary">
-                {area === "admin" ? "Malastrana" : "Ciao, utente"}
-              </p>
-              <p className="eyebrow text-xs text-muted-foreground">
-                {area === "admin" ? "Stage Manager" : "Area riservata"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {area === "admin" && notifications && notifications > 0 && (
-              <Link
-                to="/admin/notifiche"
-                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
-                aria-label="Notifiche"
-              >
-                <Bell className="h-5 w-5 text-foreground" strokeWidth={1.5} />
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
-                  {notifications}
-                </span>
+          <div className="flex items-center gap-3">
+            <Link to="/" aria-label="Torna al login" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted">
+              <Home className="h-5 w-5" strokeWidth={1.5} />
+            </Link>
+            {back && (
+              <Link to={back} aria-label="Indietro" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted">
+                ←
               </Link>
             )}
-            <Link
-              to={area === "admin" ? "/admin" : "/u"}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
-              aria-label="Torna alla home"
-              title="Torna alla home"
-            >
-              <Home className="h-5 w-5 text-foreground" strokeWidth={1.5} />
-            </Link>
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface"
-              aria-label="Apri menu"
-            >
-              <Menu className="h-5 w-5 text-foreground" strokeWidth={1.5} />
-            </button>
+            <div>
+              <p className="eyebrow text-xs text-accent">{area === "admin" ? "Ufficio" : "Area personale"}</p>
+              <h1 className="font-serif text-xl text-primary">{title}</h1>
+            </div>
           </div>
+          <button onClick={() => setOpen((v) => !v)} className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-foreground hover:bg-muted md:hidden" aria-label="Menu">
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl pb-20">{children}</main>
-
-      <nav
-        className={`fixed inset-y-0 right-0 z-30 w-64 transform border-l border-border bg-surface shadow-xl transition-transform duration-200 ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="font-serif text-lg text-primary">Menu</p>
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface"
-            aria-label="Chiudi menu"
-          >
-            <X className="h-4 w-4 text-foreground" strokeWidth={1.8} />
-          </button>
-        </div>
-        <ul className="p-4">
-          <li className="mb-3">
-            <Link
-              to={area === "admin" ? "/admin" : "/u"}
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-            >
-              <Home className="h-4 w-4" strokeWidth={1.5} />
-              Home {area === "admin" ? "Admin" : "Utente"}
-            </Link>
-          </li>
-          {area === "admin" && (
-            <>
-              <li className="mb-3">
-                <Link
-                  to="/admin/eventi"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                >
-                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
-                  Eventi
-                </Link>
-              </li>
-              <li className="mb-3">
-                <Link
-                  to="/admin/collaboratori"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                >
-                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
-                  Collaboratori
-                </Link>
-              </li>
-              <li className="mb-3">
-                <Link
-                  to="/admin/costumi"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                >
-                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
-                  Costumi
-                </Link>
-              </li>
-            </>
-          )}
-          {area === "u" && (
-            <>
-              <li className="mb-3">
-                <Link
-                  to="/u/eventi"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                >
-                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
-                  I tuoi eventi
-                </Link>
-              </li>
-              <li className="mb-3">
-                <Link
-                  to="/u/disponibilita"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                >
-                  <Shirt className="h-4 w-4" strokeWidth={1.5} />
-                  Disponibilità
-                </Link>
-              </li>
-            </>
-          )}
+      <nav className={`mx-auto hidden max-w-5xl px-3 py-2 md:block ${open ? "block" : "hidden"}`}>
+        <ul className="flex flex-wrap items-center gap-2">
+          <li><Link to="/" className={`rounded-md px-3 py-2 text-sm font-semibold ${isHome ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Login</Link></li>
+          <li><Link to="/admin" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/admin") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Ufficio</Link></li>
+          <li><Link to="/u" className={`rounded-md px-3 py-2 text-sm font-semibold ${location.pathname.startsWith("/u") ? "bg-primary text-white" : "text-foreground hover:bg-muted"}`}>Collaboratore</Link></li>
         </ul>
       </nav>
 
-      {menuOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/40"
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
+      <main className="mx-auto max-w-5xl pb-24 pt-4">{children}</main>
+
+      <footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-surface/95 backdrop-blur md:hidden">
+        <div className="mx-auto flex max-w-5xl items-center justify-around px-3 py-2">
+          <Link to="/" className={`flex flex-col items-center gap-1 px-3 py-1 ${isHome ? "text-primary" : "text-muted-foreground"}`}>
+            <Home className="h-5 w-5" strokeWidth={1.5} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Login</span>
+          </Link>
+          <Link to="/admin" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"}`}>
+            <LogOut className="h-5 w-5" strokeWidth={1.5} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Ufficio</span>
+          </Link>
+          <Link to="/u" className={`flex flex-col items-center gap-1 px-3 py-1 ${location.pathname.startsWith("/u") ? "text-primary" : "text-muted-foreground"}`}>
+            <Bell className="h-5 w-5" strokeWidth={1.5} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">Collaboratore</span>
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }
