@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { Avatar, DemoNote, SectionTitle, Tags } from "@/components/ui-kit";
+import { CollaboratorAvatar } from "@/components/CollaboratorAvatar";
+import { DemoNote, SectionTitle, Tags } from "@/components/ui-kit";
 import { useDemo } from "@/lib/store";
 import { CURRENT_USER, NOTIFICATIONS } from "@/data/demo";
 import { ChevronRight } from "lucide-react";
@@ -35,7 +36,11 @@ function ProfiloPage() {
   return (
     <AppShell area="user" title="Profilo">
       <section className="flex flex-col items-center border-b border-border bg-surface px-4 py-8 text-center">
-        <Avatar name={CURRENT_USER.name} size="lg" />
+        <CollaboratorAvatar
+          name={CURRENT_USER.name}
+          role={CURRENT_USER.role}
+          size={144}
+        />
         <h2 className="mt-4 font-serif text-2xl text-primary">{CURRENT_USER.name}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{CURRENT_USER.role}</p>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground">
