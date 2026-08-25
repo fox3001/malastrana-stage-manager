@@ -1,2 +1,0 @@
-BUILD_TRIGGER=2026-08-25T13:20:00Z
-Questo file serve a forzare il rebuild dell'anteprima Lovable
