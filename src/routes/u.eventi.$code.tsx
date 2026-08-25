@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ShieldCheck, Star } from "lucide-react";
-import { getEventByCode, getAvailabilityForEvent } from "../data/demo";
+import { ChevronLeft, ShieldCheck, Star, MapPin, Calendar, Clock, Euro, Phone, FileText } from "lucide-react";
+import { getEventByCode, getAvailabilityForEvent, payRates } from "../data/demo";
 
 export const Route = createFileRoute("/u/eventi/$code")({
   component: UserEventDetail,
@@ -27,6 +27,7 @@ function UserEventDetail() {
 
   const isConfirmed = !!myEntry?.confirmed;
   const isTL = !!myEntry?.isTL;
+  const payInfo = payRates[event.payRate];
 
   return (
     <main className="mx-auto min-h-screen max-w-3xl px-6 py-10">
@@ -37,10 +38,58 @@ function UserEventDetail() {
 
       <header className="mb-8">
         <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {event.date} • {event.location}
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Visualizza solo (modificabile solo da admin)</p>
       </header>
+
+      <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+        <h2 className="mb-4 text-base font-semibold uppercase tracking-[0.08em]">Dettagli Evento</h2>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-center gap-3">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Luogo:</span>
+            <span className="text-foreground">{event.location}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Data:</span>
+            <span className="text-foreground">{event.date}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Ritrovo:</span>
+            <span className="text-foreground">{event.meetTime}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Inizio:</span>
+            <span className="text-foreground">{event.startTime}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Fine:</span>
+            <span className="text-foreground">{event.endTime}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Euro className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Paga:</span>
+            <span className="text-foreground">{payInfo.amount}€ ({payInfo.role})</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Contatto:</span>
+            <a href={`tel:${event.contactPhone}`} className="text-primary hover:underline" title="Clicca per chiamare">
+              {event.contactName} - {event.contactPhone}
+            </a>
+          </div>
+          {event.notes && (
+            <div className="flex items-start gap-3">
+              <FileText className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Note:</span>
+              <p className="flex-1 text-foreground whitespace-pre-wrap">{event.notes}</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {isConfirmed ? (
         <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">

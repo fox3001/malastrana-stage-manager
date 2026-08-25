@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ShieldCheck, UserRound, CheckCircle2, Circle, Star } from "lucide-react";
-import { getEventByCode, getAvailabilityForEvent, confirmAnimator, unconfirmAnimator } from "../data/demo";
+import { ChevronLeft, ShieldCheck, UserRound, CheckCircle2, Circle, Star, MapPin, Calendar, Clock, Euro, Phone, FileText } from "lucide-react";
+import { getEventByCode, getAvailabilityForEvent, confirmAnimator, unconfirmAnimator, payRates } from "../data/demo";
 
 export const Route = createFileRoute("/admin/eventi/$code")({
   component: AdminEventDetail,
@@ -24,6 +24,7 @@ function AdminEventDetail() {
 
   const proposed = availability.filter((a) => a.proposed);
   const confirmed = proposed.filter((a) => a.confirmed);
+  const payInfo = payRates[event.payRate];
 
   function toggleConfirmed(userId: string, currentlyConfirmed: boolean) {
     if (currentlyConfirmed) {
@@ -49,10 +50,61 @@ function AdminEventDetail() {
 
       <header className="mb-8">
         <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {event.date} • {event.location}
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Modifica solo da admin</p>
       </header>
+
+      <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
+        <h2 className="mb-4 text-base font-semibold uppercase tracking-[0.08em]">Dettagli Evento</h2>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-center gap-3">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Luogo:</span>
+            <input type="text" defaultValue={event.location} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Data:</span>
+            <input type="date" defaultValue={event.date} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Ritrovo:</span>
+            <input type="time" defaultValue={event.meetTime} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Inizio:</span>
+            <input type="time" defaultValue={event.startTime} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Fine:</span>
+            <input type="time" defaultValue={event.endTime} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Euro className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Paga:</span>
+            <select defaultValue={event.payRate} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground">
+              <option value="A">Tariffa A - {payRates.A.amount}€ ({payRates.A.role})</option>
+              <option value="B">Tariffa B - {payRates.B.amount}€ ({payRates.B.role})</option>
+              <option value="C">Tariffa C - {payRates.C.amount}€ ({payRates.C.role})</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-3">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Contatto:</span>
+            <input type="text" defaultValue={event.contactName} placeholder="Nome" className="w-1/3 rounded-md border bg-background px-2 py-1 text-foreground" />
+            <a href={`tel:${event.contactPhone}`} className="flex-1 rounded-md border bg-background px-2 py-1 text-primary hover:underline">
+              {event.contactPhone}
+            </a>
+          </div>
+          <div className="flex items-start gap-3">
+            <FileText className="mt-0.5 h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Note:</span>
+            <textarea defaultValue={event.notes} rows={3} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+          </div>
+        </div>
+      </section>
 
       <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
@@ -78,11 +130,7 @@ function AdminEventDetail() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => toggleConfirmed(a.userId, isConfirmed)}
-                      className="flex items-center gap-1.5 text-xs font-medium hover:underline"
-                      title={isConfirmed ? "Rimuovi conferma" : "Conferma animatore"}
-                    >
+                    <button onClick={() => toggleConfirmed(a.userId, isConfirmed)} className="flex items-center gap-1.5 text-xs font-medium hover:underline" title={isConfirmed ? "Rimuovi conferma" : "Conferma animatore"}>
                       {isConfirmed ? (
                         <>
                           <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -95,11 +143,7 @@ function AdminEventDetail() {
                         </>
                       )}
                     </button>
-                    <button
-                      onClick={() => toggleTL(a.userId, isTL)}
-                      className="flex items-center gap-1.5 text-xs font-medium hover:underline"
-                      title={isTL ? "Rimuovi Team Leader" : "Segna come Team Leader"}
-                    >
+                    <button onClick={() => toggleTL(a.userId, isTL)} className="flex items-center gap-1.5 text-xs font-medium hover:underline" title={isTL ? "Rimuovi Team Leader" : "Segna come Team Leader"}>
                       <Star className={`h-4 w-4 ${isTL ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
                       <span className={isTL ? "text-yellow-400" : "text-muted-foreground"}>TL</span>
                     </button>
