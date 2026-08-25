@@ -88,6 +88,7 @@ const statusStyle: Record<EventStatus, string> = {
   confermato: "border-success/50 text-success",
   da_definire: "border-border-strong text-muted-foreground",
   annullato: "border-destructive/50 text-destructive",
+  chiuso: "border-border-strong text-muted-foreground",
 };
 
 export function StatusTag({

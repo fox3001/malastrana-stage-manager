@@ -351,6 +351,7 @@ export const STATUS_LABEL: Record<EventStatus, string> = {
   confermato: "Confermato",
   da_definire: "Da definire",
   annullato: "Annullato",
+  chiuso: "Chiuso",
 };
 
 export const VERIFICATION_LABEL: Record<Costume["verification"], string> = {
