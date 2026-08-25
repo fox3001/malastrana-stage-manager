@@ -211,7 +211,7 @@ export const COSTUMES: Costume[] = [
   { id: "cos-3", name: "Professoressa di Magia", category: "Costume Completo", character: "Professoressa di Magia", tags: ["#potter", "#magia", "#professore"], verification: "inserito", owner: "col-elena", notes: "Tunica lunga, mantello, occhiali di scena." },
   { id: "cos-4", name: "Capitano Corsaro", category: "Costume Completo", character: "Jack Sparrow", tags: ["#pirata", "#combattimento", "#mare"], verification: "verificato", owner: "col-marco" },
   { id: "cos-5", name: "Armatura da Torneo", category: "Costume Completo", character: "Cavaliere Nero", tags: ["#medievale", "#armatura", "#combattimento"], verification: "in_verifica", owner: "col-marco" },
-  { id: "cos-6", name: "Dama di Corte", category: "Costume Completo", tags: ["#medievale", "#nobiltà"], verification: "verificato", owner: "col-giulia" },
+  { id: "cos-6", name: "Dama di Corte", category: "Costume Completo", tags: ["#medievale", "#nobiltà»»], verification: "verificato", owner: "col-giulia" },
 ];
 
 export const GEAR: GearItem[] = [
@@ -248,7 +248,7 @@ export function dayNumber(iso: string) {
 
 export function monthShort(iso: string) {
   return MONTHS[new Date(iso + "T00:00:00").getMonth()].slice(0, 3).toUpperCase();
-}}
+}
 
 export const DEMO_USER_IDS: Record<string, string> = {
   "col-elena": "Elena Rossi",
