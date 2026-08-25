@@ -4,7 +4,7 @@
  * La forma dei tipi è pensata per essere mappata in futuro su tabelle reali.
  */
 
-export type EventStatus = "richiesta" | "confermato" | "da_definire" | "annullato";
+export type EventStatus = "richiesta" | "confermato" | "da_definire" | "annullato" | "chiuso";
 
 export type Availability = "disponibile" | "non_disponibile" | "da_definire" | null;
 

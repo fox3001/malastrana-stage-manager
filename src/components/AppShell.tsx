@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Bell, ClipboardList, ShieldCheck } from "lucide-react";
 import { type ReactNode } from "react";
 
-export interface AppShellProps { area: "admin" | "u"; title: string; children: ReactNode; back?: string; }
+export interface AppShellProps { area: "admin" | "u" | "user"; title: string; children: ReactNode; back?: string; notifications?: number; }
 
 export function AppShell({ area, title, children, back }: AppShellProps) {
   const location = useLocation();
