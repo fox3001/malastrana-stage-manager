@@ -224,7 +224,6 @@ export const GEAR: GearItem[] = [
 export const NOTIFICATIONS = [
   { id: "n1", text: "Richiesta di disponibilità per Halloween Experience.", when: "2 giorni fa" },
   { id: "n2", text: "Ruolo assegnato per Omicidio al Castello.", when: "5 giorni fa" },
-  { id: "n3", text: "Il costume “Cavaliere Nero” è in verifica presso l'ufficio.", when: "1 settimana fa" },
 ];
 
 export const STATUS_LABEL: Record<EventStatus, string> = {
