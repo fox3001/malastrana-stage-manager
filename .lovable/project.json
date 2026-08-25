@@ -1,5 +1,8 @@
 {
-  "schemaVersion": 1,
-  "template": "tanstack_start_ts_current",
-  "revision": "tanstack_start_ts_current-b3e81c491308"
+  "id": "malastrana-stage-manager",
+  "name": "Malastrana Stage Manager",
+  "preview": {
+    "live": false
+  },
+  "lastBuildTrigger": "2026-08-25T13:21:00Z"
 }
