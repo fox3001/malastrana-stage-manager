@@ -60,10 +60,6 @@
     "typescript-eslint": "^8.26.0",
     "vite": "^6.2.0"
   },
-  "overrides": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
-  },
   "engines": {
     "node": "22"
   }
