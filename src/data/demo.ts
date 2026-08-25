@@ -1,389 +1,101 @@
-/**
- * DATI DIMOSTRATIVI — prototipo UI Malastrana.
- * Nessun backend: questi oggetti alimentano lo store locale (localStorage).
- * La forma dei tipi è pensata per essere mappata in futuro su tabelle reali.
- */
-
-export type EventStatus = "richiesta" | "confermato" | "da_definire" | "annullato" | "chiuso";
-
-export type Availability = "disponibile" | "non_disponibile" | "da_definire" | null;
-
-export interface MalEvent {
-  id: string;
+export interface Event {
   code: string;
-  name: string;
-  date: string; // ISO
-  place: string;
-  timeStart: string;
-  timeEnd: string;
-  status: EventStatus;
-  theme: string;
-  type: string;
-  duration: string;
-  publicInfo: string;
-  cancelReason?: string;
-  /** presente solo quando l'evento è confermato */
-  assignment?: {
-    role: string;
-    callTime: string;
-    referent: string;
-    instructions: string;
-    dressCode: string;
-    costumeId: string;
-    fee: string;
-  };
-}
-
-export interface Costume {
-  id: string;
-  name: string;
-  category: string;
-  character?: string;
-  tags: string[];
-  verification: "verificato" | "in_verifica" | "inserito";
-  owner: string;
-  notes?: string;
-}
-
-export interface GearItem {
-  id: string;
-  name: string;
-  description: string;
-  tags: string[];
-  verification: "verificato" | "in_verifica" | "inserito";
-  owner: string;
-}
-
-export interface LoadRow {
-  id: string;
-  name: string;
-  code: string;
-  qty: number;
-  present: boolean;
-  returned: boolean;
-  damaged: boolean;
-  comment: string;
+  title: string;
+  date: string;
+  location: string;
 }
 
 export interface Collaborator {
   id: string;
   name: string;
   role: string;
-  bio: string;
-  skills: string[];
-  state: string;
 }
 
-export const CURRENT_USER: Collaborator = {
-  id: "col-elena",
-  name: "Elena Rossi",
-  role: "Attrice e performer",
-  bio: "Attrice, performer e animatrice. Esperienza in eventi immersivi, spettacoli itineranti e gestione del pubblico.",
-  skills: [
-    "#attrice",
-    "#fuoco",
-    "#combattimento",
-    "#medievale",
-    "#pirata",
-    "#gestionePubblico",
-  ],
-  state: "Attiva",
-};
-
-export const COLLABORATORS: Collaborator[] = [
-  CURRENT_USER,
-  {
-    id: "col-marco",
-    name: "Marco Bianchi",
-    role: "Attore / Combattente scenico",
-    bio: "Attore con formazione in scherma scenica e spettacoli itineranti.",
-    skills: ["#combattimento", "#medievale", "#stunt"],
-    state: "Attivo",
-  },
-  {
-    id: "col-giulia",
-    name: "Giulia Ferrari",
-    role: "Performer / Trucco scenico",
-    bio: "Performer e truccatrice, specializzata in horror e prostetica leggera.",
-    skills: ["#trucco", "#horror", "#performer"],
-    state: "Da confermare",
-  },
-  {
-    id: "col-davide",
-    name: "Davide Conti",
-    role: "Tecnico di scena",
-    bio: "Tecnico luci e allestimenti per eventi immersivi.",
-    skills: ["#tecnico", "#luci", "#allestimenti"],
-    state: "Attivo",
-  },
-];
-
-export const EVENTS: MalEvent[] = [
-  {
-    id: "evt-1",
-    code: "MAL-261031-03",
-    name: "Halloween Experience",
-    date: "2026-10-31",
-    place: "Castello di …",
-    timeStart: "18:00",
-    timeEnd: "00:30",
-    status: "richiesta",
-    theme: "Horror immersivo",
-    type: "Spettacolo immersivo itinerante",
-    duration: "6h 30m",
-    publicInfo:
-      "Percorso a gruppi con attori in scena lungo il camminamento e le sale interne. Ingresso pubblico scaglionato.",
-  },
-  {
-    id: "evt-2",
-    code: "MAL-261115-01",
-    name: "Omicidio al Castello",
-    date: "2026-11-15",
-    place: "…",
-    timeStart: "17:00",
-    timeEnd: "23:30",
-    status: "confermato",
-    theme: "Mistero storico",
-    type: "Cena con delitto",
-    duration: "6h 30m",
-    publicInfo:
-      "Cena con delitto in sale interne, interazione continua con i tavoli e finale in salone.",
-    assignment: {
-      role: "Dama di corte / sospettata",
-      callTime: "16:00 — trucco e prove · 16:45 — allineamento cast",
-      referent: "Direzione di scena Malastrana (demo)",
-      instructions:
-        "Ingresso in sala dopo il secondo servizio. Mantenere il personaggio anche nelle pause. Non anticipare la rivelazione finale prima del segnale della regia.",
-      dressCode: "Abito storico scuro, nessun accessorio moderno visibile.",
-      costumeId: "cos-3",
-      fee: "€ 180,00 (dato dimostrativo)",
-    },
-  },
-  {
-    id: "evt-3",
-    code: "MAL-261122-02",
-    name: "Vino e Misteri",
-    date: "2026-11-22",
-    place: "…",
-    timeStart: "18:30",
-    timeEnd: "23:00",
-    status: "da_definire",
-    theme: "Investigazione e degustazione",
-    type: "Format investigativo con degustazione",
-    duration: "4h 30m",
-    publicInfo:
-      "Percorso investigativo abbinato a degustazione guidata. Struttura in via di definizione.",
-  },
-  {
-    id: "evt-4",
-    code: "MAL-261130-01",
-    name: "Evento Annullato Demo",
-    date: "2026-11-30",
-    place: "…",
-    timeStart: "19:00",
-    timeEnd: "23:00",
-    status: "annullato",
-    theme: "Evento dimostrativo",
-    type: "Evento dimostrativo",
-    duration: "4h",
-    publicInfo: "Evento dimostrativo utilizzato per mostrare lo stato annullato.",
-    cancelReason:
-      "Condizioni meteo non compatibili con lo svolgimento dell’evento.",
-  },
-];
-
-export const COSTUMES: Costume[] = [
-  {
-    id: "cos-1",
-    name: "Base Pirata",
-    category: "Base Pirata",
-    tags: ["#pirata", "#spada", "#combattimento"],
-    verification: "verificato",
-    owner: "col-elena",
-    notes: "Camicia, corpetto, fascia, stivali. Adatta a scene di combattimento.",
-  },
-  {
-    id: "cos-2",
-    name: "Cavaliere Nero",
-    category: "Costume Completo",
-    character: "Cavaliere Nero",
-    tags: ["#medievale", "#armatura", "#combattimento"],
-    verification: "in_verifica",
-    owner: "col-elena",
-    notes: "Armatura leggera in cuoio, mantello nero, elmo.",
-  },
-  {
-    id: "cos-3",
-    name: "Professoressa di Magia",
-    category: "Costume Completo",
-    character: "Professoressa di Magia",
-    tags: ["#potter", "#magia", "#professore"],
-    verification: "inserito",
-    owner: "col-elena",
-    notes: "Tunica lunga, mantello, occhiali di scena.",
-  },
-  {
-    id: "cos-4",
-    name: "Capitano Corsaro",
-    category: "Costume Completo",
-    character: "Jack Sparrow",
-    tags: ["#pirata", "#combattimento", "#mare"],
-    verification: "verificato",
-    owner: "col-marco",
-  },
-  {
-    id: "cos-5",
-    name: "Armatura da Torneo",
-    category: "Costume Completo",
-    character: "Cavaliere Nero",
-    tags: ["#medievale", "#armatura", "#combattimento"],
-    verification: "in_verifica",
-    owner: "col-marco",
-  },
-  {
-    id: "cos-6",
-    name: "Dama di Corte",
-    category: "Costume Completo",
-    tags: ["#medievale", "#nobiltà"],
-    verification: "verificato",
-    owner: "col-giulia",
-  },
-];
-
-export const GEAR: GearItem[] = [
-  {
-    id: "gear-1",
-    name: "Spada lunga",
-    description: "Replica scenica non affilata, lama in acciaio dolce.",
-    tags: ["#combattimento", "#medievale"],
-    verification: "verificato",
-    owner: "col-elena",
-  },
-  {
-    id: "gear-2",
-    name: "Lanterna",
-    description: "Lanterna a candela LED, luce calda.",
-    tags: ["#notturno", "#scena"],
-    verification: "verificato",
-    owner: "col-elena",
-  },
-  {
-    id: "gear-3",
-    name: "Bacchetta",
-    description: "Bacchetta in legno intagliato, custodia inclusa.",
-    tags: ["#magia", "#potter"],
-    verification: "in_verifica",
-    owner: "col-elena",
-  },
-  {
-    id: "gear-4",
-    name: "Accessori in cuoio",
-    description: "Cinture, bracciali e borsello in cuoio naturale.",
-    tags: ["#medievale", "#pirata"],
-    verification: "inserito",
-    owner: "col-elena",
-  },
-];
-
-export const LOAD_ROWS: LoadRow[] = [
-  {
-    id: "row-1",
-    name: "Mantello Nero",
-    code: "COS-042",
-    qty: 1,
-    present: false,
-    returned: false,
-    damaged: false,
-    comment: "",
-  },
-  {
-    id: "row-2",
-    name: "Spada Lunga",
-    code: "PROP-018",
-    qty: 1,
-    present: false,
-    returned: false,
-    damaged: false,
-    comment: "",
-  },
-  {
-    id: "row-3",
-    name: "Lanterna",
-    code: "PROP-031",
-    qty: 2,
-    present: false,
-    returned: false,
-    damaged: false,
-    comment: "",
-  },
-  {
-    id: "row-4",
-    name: "Cintura in cuoio",
-    code: "ACC-011",
-    qty: 1,
-    present: false,
-    returned: false,
-    damaged: false,
-    comment: "",
-  },
-];
-
-export const NOTIFICATIONS = [
-  {
-    id: "n1",
-    text: "Richiesta di disponibilità per Halloween Experience.",
-    when: "2 giorni fa",
-  },
-  {
-    id: "n2",
-    text: "Ruolo assegnato per Omicidio al Castello.",
-    when: "5 giorni fa",
-  },
-  {
-    id: "n3",
-    text: "Il costume “Cavaliere Nero” è in verifica presso l’ufficio.",
-    when: "1 settimana fa",
-  },
-];
-
-export const STATUS_LABEL: Record<EventStatus, string> = {
-  richiesta: "Disponibilità richiesta",
-  confermato: "Confermato",
-  da_definire: "Da definire",
-  annullato: "Annullato",
-  chiuso: "Chiuso",
-};
-
-export const VERIFICATION_LABEL: Record<Costume["verification"], string> = {
-  verificato: "Verificato dall’ufficio",
-  in_verifica: "In verifica",
-  inserito: "Inserito dal collaboratore",
-};
-
-export const MONTHS = [
-  "gennaio",
-  "febbraio",
-  "marzo",
-  "aprile",
-  "maggio",
-  "giugno",
-  "luglio",
-  "agosto",
-  "settembre",
-  "ottobre",
-  "novembre",
-  "dicembre",
-];
-
-export function formatDate(iso: string) {
-  const d = new Date(iso + "T00:00:00");
-  return `${d.getDate()} ${MONTHS[d.getMonth()]!} ${d.getFullYear()}`;
+export interface EventAvailability {
+  eventId: string;
+  userId: string;
+  name: string;
+  proposed: boolean;
+  confirmed?: boolean;
+  isTL?: boolean;
 }
 
-export function dayNumber(iso: string) {
-  return new Date(iso + "T00:00:00").getDate().toString().padStart(2, "0");
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  eventId?: string;
+  read: boolean;
+  createdAt: string;
 }
 
-export function monthShort(iso: string) {
-  return MONTHS[new Date(iso + "T00:00:00").getMonth()]!.slice(0, 3).toUpperCase();
+export const collaborators: Collaborator[] = [
+  { id: "c1", name: "Alice", role: "Animatore" },
+  { id: "c2", name: "Bob", role: "Animatore" },
+  { id: "c3", name: "Charlie", role: "Animatore" },
+];
+
+export const events: Event[] = [
+  {
+    code: "E001",
+    title: "Festa di Benvenuto",
+    date: "2026-09-10",
+    location: "Teatro Centrale",
+  },
+  {
+    code: "E002",
+    title: "Spettacolo di Fine Stagione",
+    date: "2026-12-20",
+    location: "Arena Grande",
+  },
+];
+
+export const eventAvailability: EventAvailability[] = [
+  { eventId: "E001", userId: "c1", name: "Alice", proposed: true, confirmed: false, isTL: false },
+  { eventId: "E001", userId: "c2", name: "Bob", proposed: true, confirmed: false, isTL: false },
+  { eventId: "E002", userId: "c1", name: "Alice", proposed: true, confirmed: false, isTL: false },
+  { eventId: "E002", userId: "c3", name: "Charlie", proposed: true, confirmed: false, isTL: false },
+];
+
+export const notifications: Notification[] = [];
+
+export function getEventByCode(code: string): Event | undefined {
+  return events.find((e) => e.code === code);
+}
+
+export function getAvailabilityForEvent(eventId: string): EventAvailability[] {
+  return eventAvailability.filter((a) => a.eventId === eventId);
+}
+
+export function confirmAnimator(eventId: string, userId: string, isTL: boolean) {
+  const entry = eventAvailability.find((a) => a.eventId === eventId && a.userId === userId);
+  if (!entry) return;
+  entry.confirmed = true;
+  entry.isTL = isTL;
+  notifications.push({
+    id: `n-${Date.now()}-${userId}`,
+    userId,
+    title: "Conferma disponibilità",
+    message: `Sei stato confermato come animatore per l'evento ${eventId}${isTL ? " (Team Leader)" : ""}.`,
+    eventId,
+    read: false,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export function unconfirmAnimator(eventId: string, userId: string) {
+  const entry = eventAvailability.find((a) => a.eventId === eventId && a.userId === userId);
+  if (!entry) return;
+  entry.confirmed = false;
+  entry.isTL = false;
+}
+
+export function getNotificationsForUser(userId: string): Notification[] {
+  return notifications.filter((n) => n.userId === userId);
+}
+
+export function markNotificationRead(notificationId: string) {
+  const n = notifications.find((x) => x.id === notificationId);
+  if (n) n.read = true;
 }
