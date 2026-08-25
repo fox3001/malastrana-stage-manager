@@ -3,6 +3,16 @@
 export type EventStatus = "richiesta" | "confermato" | "da_definire" | "annullato" | "chiuso";
 export type Availability = "disponibile" | "non_disponibile" | "da_definire" | null;
 
+export interface LoadRow {
+  id: string;
+  name: string;
+  category: "costume" | "attrezzo" | "scenografia";
+  present: boolean;
+  damaged: boolean;
+  lost: boolean;
+  notes: string;
+}
+
 export interface MalEvent {
   id: string;
   code: string;
@@ -21,6 +31,7 @@ export interface MalEvent {
   duration: string;
   publicInfo: string;
   cancelReason?: string;
+  bolla?: LoadRow[];
   assignment?: {
     role: string;
     callTime: string;
@@ -50,17 +61,6 @@ export interface GearItem {
   tags: string[];
   verification: "verificato" | "in_verifica" | "inserito";
   owner: string;
-}
-
-export interface LoadRow {
-  id: string;
-  name: string;
-  code: string;
-  qty: number;
-  present: boolean;
-  returned: boolean;
-  damaged: boolean;
-  comment: string;
 }
 
 export interface Collaborator {
@@ -125,6 +125,11 @@ export const EVENTS: MalEvent[] = [
     type: "Spettacolo immersivo itinerante",
     duration: "6h 30m",
     publicInfo: "Percorso a gruppi con attori in scena lungo il camminamento e le sale interne. Ingresso pubblico scaglionato.",
+    bolla: [
+      { id: "row-1", name: "Mantello Nero", category: "costume", present: false, damaged: false, lost: false, notes: "" },
+      { id: "row-2", name: "Spada Lunga", category: "attrezzo", present: false, damaged: false, lost: false, notes: "" },
+      { id: "row-3", name: "Lanterna", category: "attrezzo", present: false, damaged: false, lost: false, notes: "" },
+    ],
   },
   {
     id: "evt-2",
@@ -152,6 +157,10 @@ export const EVENTS: MalEvent[] = [
       costumeId: "cos-3",
       fee: "€ 180,00 (dato dimostrativo)",
     },
+    bolla: [
+      { id: "row-4", name: "Abito storico scuro", category: "costume", present: false, damaged: false, lost: false, notes: "" },
+      { id: "row-5", name: "Candelabro", category: "scenografia", present: false, damaged: false, lost: false, notes: "" },
+    ],
   },
   {
     id: "evt-3",
@@ -170,6 +179,9 @@ export const EVENTS: MalEvent[] = [
     type: "Format investigativo con degustazione",
     duration: "4h 30m",
     publicInfo: "Percorso investigativo abbinato a degustazione guidata. Struttura in via di definizione.",
+    bolla: [
+      { id: "row-6", name: "Calici da degustazione", category: "attrezzo", present: false, damaged: false, lost: false, notes: "" },
+    ],
   },
   {
     id: "evt-4",
@@ -189,6 +201,7 @@ export const EVENTS: MalEvent[] = [
     duration: "4h",
     publicInfo: "Evento dimostrativo utilizzato per mostrare lo stato annullato.",
     cancelReason: "Condizioni meteo non compatibili con lo svolgimento dell'evento.",
+    bolla: [],
   },
 ];
 
@@ -198,7 +211,7 @@ export const COSTUMES: Costume[] = [
   { id: "cos-3", name: "Professoressa di Magia", category: "Costume Completo", character: "Professoressa di Magia", tags: ["#potter", "#magia", "#professore"], verification: "inserito", owner: "col-elena", notes: "Tunica lunga, mantello, occhiali di scena." },
   { id: "cos-4", name: "Capitano Corsaro", category: "Costume Completo", character: "Jack Sparrow", tags: ["#pirata", "#combattimento", "#mare"], verification: "verificato", owner: "col-marco" },
   { id: "cos-5", name: "Armatura da Torneo", category: "Costume Completo", character: "Cavaliere Nero", tags: ["#medievale", "#armatura", "#combattimento"], verification: "in_verifica", owner: "col-marco" },
-  { id: "cos-6", name: "Dama di Corte", category: "Costume Completo", tags: ["#medievale", "#nobiltà"], verification: "verificato", owner: "col-giulia" },
+  { id: "cos-6", name: "Dama di Corte", category: "Costume Completo", tags: ["#medievale", "#nobiltà«±], verification: "verificato", owner: "col-giulia" },
 ];
 
 export const GEAR: GearItem[] = [
@@ -208,21 +221,14 @@ export const GEAR: GearItem[] = [
   { id: "gear-4", name: "Accessori in cuoio", description: "Cinture, bracciali e borsello in cuoio naturale.", tags: ["#medievale", "#pirata"], verification: "inserito", owner: "col-elena" },
 ];
 
-export const LOAD_ROWS: LoadRow[] = [
-  { id: "row-1", name: "Mantello Nero", code: "COS-042", qty: 1, present: false, returned: false, damaged: false, comment: "" },
-  { id: "row-2", name: "Spada Lunga", code: "PROP-018", qty: 1, present: false, returned: false, damaged: false, comment: "" },
-  { id: "row-3", name: "Lanterna", code: "PROP-031", qty: 2, present: false, returned: false, damaged: false, comment: "" },
-  { id: "row-4", name: "Cintura in cuoio", code: "ACC-011", qty: 1, present: false, returned: false, damaged: false, comment: "" },
-];
-
 export const NOTIFICATIONS = [
   { id: "n1", text: "Richiesta di disponibilità per Halloween Experience.", when: "2 giorni fa" },
   { id: "n2", text: "Ruolo assegnato per Omicidio al Castello.", when: "5 giorni fa" },
-  { id: "n3", text: "Il costume “Cavaliere Nero” è in verifica presso l'ufficio.", when: "1 settimana fa" },
+  { id: "n3", text: "Il costume "Cavaliere Nero" è in verifica presso l'ufficio.", when: "1 settimana fa" },
 ];
 
 export const STATUS_LABEL: Record<EventStatus, string> = {
-  richiesta: "Disponibilità richiesta",
+  richiesta: "Disponibilità±± richiesta",
   confermato: "Confermato",
   da_definire: "Da definire",
   annullato: "Annullato",
