@@ -1,135 +1,157 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ShieldCheck, Star, MapPin, Calendar, Clock, Euro, Phone, FileText } from "lucide-react";
-import { getEventByCode, getAvailabilityForEvent, payRates } from "../data/demo";
+import { createFileRoute } from '@tanstack/react-router'
+import { AppShell } from '@/components/AppShell'
+import { useDemo } from '@/data/demo'
+import { useStore } from '@/lib/store'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { format } from 'date-fns'
+import { it } from 'date-fns/locale'
+import { CalendarDays, MapPin, Clock, Euro, Phone, Users, Shirt } from 'lucide-react'
 
-export const Route = createFileRoute("/u/eventi/$code")({
-  component: UserEventDetail,
-});
+export const Route = createFileRoute('/u/eventi/$code')({
+  component: UserEventiDettaglio,
+})
 
-function UserEventDetail() {
-  const { code } = Route.useParams();
-  const event = getEventByCode(code);
-  const availability = getAvailabilityForEvent(code);
+function UserEventiDettaglio() {
+  const { code } = Route.useParams()
+  const { events, team, costumes, materials, assignments, notifications } = useDemo()
+  const user = useStore((s) => s.user)
 
-  const currentUserId = "c1";
-  const myEntry = availability.find((a) => a.userId === currentUserId);
+  const event = events.find((e) => e.code === code)
+  if (!event) return <AppShell user={user}><div>Evento non trovato</div></AppShell>
 
-  if (!event) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-        <p className="text-muted-foreground">Evento non trovato.</p>
-        <Link to="/u/eventi" className="mt-4 text-sm text-primary hover:underline">
-          Torna agli eventi
-        </Link>
-      </div>
-    );
-  }
+  const eventTeam = team.filter((t) => t.eventCode === event.code)
+  const eventCostumes = costumes.filter((c) => c.eventCode === event.code)
+  const eventMaterials = materials.filter((m) => m.eventCode === event.code)
+  const eventAssignments = assignments.filter((a) => a.eventCode === event.code)
+  const eventNotifications = notifications.filter((n) => n.eventCode === event.code)
 
-  const isConfirmed = !!myEntry?.confirmed;
-  const isTL = !!myEntry?.isTL;
-  const payInfo = payRates[event.payRate];
+  const myAssignment = eventAssignments.find((a) => a.userId === user?.id)
+  const isTeamLeader = myAssignment?.isTeamLeader ?? false
+  const hasBolla = eventAssignments.some((a) => a.userId === user?.id && a.hasBolla)
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-6 py-10">
-      <Link to="/u/eventi" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" />
-        Torna agli eventi
-      </Link>
-
-      <header className="mb-8">
-        <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Visualizza solo (modificabile solo da admin)</p>
-      </header>
-
-      <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold uppercase tracking-[0.08em]">Dettagli Evento</h2>
-        <div className="space-y-3 text-sm">
-          <div className="flex items-center gap-3">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Luogo:</span>
-            <span className="text-foreground">{event.location}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Data:</span>
-            <span className="text-foreground">{event.date}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Ritrovo:</span>
-            <span className="text-foreground">{event.meetTime}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Inizio:</span>
-            <span className="text-foreground">{event.startTime}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Fine:</span>
-            <span className="text-foreground">{event.endTime}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Euro className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Paga:</span>
-            <span className="text-foreground">{payInfo.amount}€ ({payInfo.role})</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Contatto:</span>
-            <a href={`tel:${event.contactPhone}`} className="text-primary hover:underline" title="Clicca per chiamare">
-              {event.contactName} - {event.contactPhone}
-            </a>
-          </div>
-          {event.notes && (
-            <div className="flex items-start gap-3">
-              <FileText className="mt-0.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Note:</span>
-              <p className="flex-1 text-foreground whitespace-pre-wrap">{event.notes}</p>
-            </div>
-          )}
+    <AppShell user={user}>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">{event.name}</h1>
+          <Badge variant={event.status === 'aperto' ? 'default' : 'secondary'}>
+            {event.status}
+          </Badge>
         </div>
-      </section>
 
-      {isConfirmed ? (
-        <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={1.5} />
-            <h2 className="text-base font-semibold">Il tuo stato per questo evento</h2>
-          </div>
-          <div className="flex items-center gap-3 rounded-md border p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <ShieldCheck className="h-6 w-6" strokeWidth={1.5} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Dettagli evento</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              <span>{format(new Date(event.date), 'PPP', { locale: it })}</span>
             </div>
-            <div>
-              <p className="text-sm font-medium">Sei confermato come animatore</p>
-              <p className="text-xs text-muted-foreground">L'ufficio ti ha inserito tra gli animatori per questo evento.</p>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span>{event.place}</span>
             </div>
-            {isTL && (
-              <div className="ml-auto flex items-center gap-1.5 rounded-full bg-yellow-400/15 px-2.5 py-1 text-xs font-medium text-yellow-500">
-                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                Team Leader
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Ritrovo: {event.timeStart}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Fine: {event.timeEnd}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Euro className="h-4 w-4" />
+              <span>Tariffa: {event.rate} €</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              <span>{event.contactPhone}</span>
+            </div>
+            {event.notes && (
+              <div className="md:col-span-2">
+                <strong>Note:</strong> {event.notes}
               </div>
             )}
-          </div>
-        </section>
-      ) : (
-        <section className="mb-10 rounded-lg border bg-card p-5 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            <h2 className="text-base font-semibold">Il tuo stato per questo evento</h2>
-          </div>
-          <div className="flex items-center gap-3 rounded-md border p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <ShieldCheck className="h-6 w-6" strokeWidth={1.5} />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Non sei ancora confermato</p>
-              <p className="text-xs text-muted-foreground">Hai segnalato disponibilità, ma l'ufficio non ti ha ancora confermato.</p>
-            </div>
-          </div>
-        </section>
-      )}
-    </main>
-  );
+          </CardContent>
+        </Card>
+
+        {myAssignment && (
+          <Card>
+            <CardHeader>
+              <CardTitle>La tua convocazione</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p><strong>Ruolo:</strong> {myAssignment.role}</p>
+              {isTeamLeader && <Badge variant="outline">Team Leader</Badge>}
+              {hasBolla && (
+                <Button variant="outline" size="sm" onClick={() => Route.navigate({ to: '/u/bolla/$code', params: { code } })}>
+                  Vedi bolla
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Team</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {eventTeam.length === 0 ? (
+              <p className="text-muted-foreground">Nessun membro nel team</p>
+            ) : (
+              eventTeam.map((member) => (
+                <div key={member.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{member.name}</p>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                  </div>
+                  {member.isTeamLeader && <Badge variant="outline">Team Leader</Badge>}
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Costumi</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {eventCostumes.length === 0 ? (
+              <p className="text-muted-foreground">Nessun costume</p>
+            ) : (
+              eventCostumes.map((c) => (
+                <div key={c.id} className="flex items-center gap-2">
+                  <Shirt className="h-4 w-4" />
+                  <span>{c.name} ({c.size})</span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Materiale</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {eventMaterials.length === 0 ? (
+              <p className="text-muted-foreground">Nessun materiale</p>
+            ) : (
+              eventMaterials.map((m) => (
+                <div key={m.id}>
+                  <p className="font-medium">{m.name}</p>
+                  <p className="text-sm text-muted-foreground">Qta: {m.quantity}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AppShell>
+  )
 }
