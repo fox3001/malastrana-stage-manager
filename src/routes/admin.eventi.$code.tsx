@@ -48,7 +48,7 @@ function AdminEventDetail() {
       </Link>
 
       <header className="mb-8">
-        <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
+        <h1 className="font-serif text-3xl text-primary">{event.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Modifica solo da admin</p>
       </header>
 
@@ -58,7 +58,7 @@ function AdminEventDetail() {
           <div className="flex items-center gap-3">
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Luogo:</span>
-            <input type="text" defaultValue={event.location} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+            <input type="text" defaultValue={event.place} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -73,12 +73,12 @@ function AdminEventDetail() {
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Inizio:</span>
-            <input type="time" defaultValue={event.startTime} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+            <input type="time" defaultValue={event.timeStart} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Fine:</span>
-            <input type="time" defaultValue={event.endTime} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
+            <input type="time" defaultValue={event.timeEnd} className="flex-1 rounded-md border bg-background px-2 py-1 text-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <Phone className="h-4 w-4 text-muted-foreground" />

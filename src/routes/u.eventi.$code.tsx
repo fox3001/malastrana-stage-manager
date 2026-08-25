@@ -36,7 +36,7 @@ function UserEventDetail() {
       </Link>
 
       <header className="mb-8">
-        <h1 className="font-serif text-3xl text-primary">{event.title}</h1>
+        <h1 className="font-serif text-3xl text-primary">{event.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Visualizza solo (modificabile solo da admin)</p>
       </header>
 
@@ -46,7 +46,7 @@ function UserEventDetail() {
           <div className="flex items-center gap-3">
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Luogo:</span>
-            <span className="text-foreground">{event.location}</span>
+            <span className="text-foreground">{event.place}</span>
           </div>
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -61,12 +61,12 @@ function UserEventDetail() {
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Inizio:</span>
-            <span className="text-foreground">{event.startTime}</span>
+            <span className="text-foreground">{event.timeStart}</span>
           </div>
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Fine:</span>
-            <span className="text-foreground">{event.endTime}</span>
+            <span className="text-foreground">{event.timeEnd}</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="h-4 w-4 text-muted-foreground" />
