@@ -11,58 +11,16 @@ import {
 } from "@/data/demo";
 
 /* ------------------------------------------------------------------ */
-/* Marchio e placeholder logo                                          */
+/* Marchio e logo immagine                                             */
 /* ------------------------------------------------------------------ */
 
-export function Hourglass({ className }: { className?: string }) {
+export function LogoImage({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M7 3h10M7 21h10M8 3v3.2c0 1.4 1 2.3 2.2 3.2L12 11l1.8-1.6C15 8.5 16 7.6 16 6.2V3M8 21v-3.2c0-1.4 1-2.3 2.2-3.2L12 13l1.8 1.6c1.2.9 2.2 1.8 2.2 3.2V21"
-        stroke="currentColor"
-        strokeWidth="1.1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export function LogoMark({ className }: { className?: string }) {
-  // Placeholder tecnico: sostituibile con l'asset logo definitivo.
-  return (
-    <div
-      data-logo-placeholder="malastrana"
-      className={cn(
-        "flex h-16 w-16 items-center justify-center border border-primary/40 text-primary",
-        className,
-      )}
-    >
-      <Hourglass className="h-8 w-8" />
-    </div>
-  );
-}
-
-export function Wordmark({ small }: { small?: boolean }) {
-  return (
-    <div className="text-center">
-      <h1
-        className={cn(
-          "font-serif tracking-[0.16em] text-primary",
-          small ? "text-lg" : "text-3xl sm:text-4xl",
-        )}
-      >
-        MALASTRANA
-      </h1>
-      <p
-        className={cn(
-          "font-sans uppercase tracking-[0.28em] text-accent",
-          small ? "text-[9px] mt-0.5" : "text-[11px] mt-1.5",
-        )}
-      >
-        Eventi senza tempo
-      </p>
-    </div>
+    <img
+      src="/malastrana-logo.png"
+      alt="Malastrana logo"
+      className={cn("mx-auto block h-auto w-full max-w-[160px] sm:max-w-[200px]", className)}
+    />
   );
 }
 
